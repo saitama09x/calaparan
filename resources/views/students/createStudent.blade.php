@@ -1,5 +1,10 @@
 @extends('layouts.dashboardLayout')
 
+@push('styles')
+<link href="{{ asset('assets/datepicker/css/bootstrap-datepicker3.min.css') }}" />
+<link href="{{ asset('assets/datepicker/css/bootstrap-datepicker3.standalone.min.css') }}" />
+@endpush
+
 @section('content')
 
 <div class='row'>
@@ -28,7 +33,7 @@
       </div>
       <div class="form-group">
          <?php echo Form::label('bday', 'Birthday'); ?>
-         <?php echo Form::text('bday', '', ['class' => 'form-control', 'placeholder' => 'Birthday']); ?>
+         <?php echo Form::text('bday', '', ['class' => 'form-control datepicker', 'placeholder' => 'Birthday']); ?>
       </div>
       <div class="form-group">
          <?php echo Form::label('sex', 'Gender'); ?>
@@ -44,3 +49,10 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script src="{{ asset('assets/datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+<script>
+$('.datepicker').datepicker()
+</script>
+@endpush

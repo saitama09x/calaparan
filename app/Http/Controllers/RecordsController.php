@@ -71,28 +71,26 @@ class RecordsController extends Controller{
 	}
 
 	function api_insert_remarks(Request $r){
+
 		$subjcode = $r->subjcode;
 		$enroll_id = $r->enroll_id;
 		$value = $r->value;
 
-		$find = Student_remarks::where(
+		$status = false;
+
+		$find = Student_records::where(
 			'enroll_id', '=', $enroll_id
 		)->where('subjcode', '=', $subjcode);
 
-		if(!$find->exists()){
-			$new = new Student_remarks;
-			$new->enroll_id = $enroll_id;
-			$new->subjcode = $subjcode;
-			$new->remarks = $value;
-			$new->save();
-		}
-		else{
+		if($find->exists()){
 			$find->update(
 				['remarks' => $value]
 			);
+
+			$status = true;
 		}
-		return response("asdas", 200)
-                  ->header('Content-Type', 'text/plain');
+
+		return response()->json(['status' => $status]);
 	}
 
 	function print_report_card($student_id){

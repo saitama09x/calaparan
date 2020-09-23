@@ -8,7 +8,7 @@
 	<div class="card-header">
     <h3 class="card-title">Add Teacher Information</h3>
   </div>
-{!! Form::model($teachers, ['route' => ['teacher.store']]) !!}
+{!! Form::model($teachers, ['route' => 'teacher_docreate', 'method' => 'post']) !!}
 <div class='card-body'>
 <div class="form-group">
 <?php echo Form::label('fullname', 'FullName'); ?>
@@ -16,18 +16,22 @@
 </div>
 <div class="form-group">
 <?php echo Form::label('sectname', 'Section'); ?>
-<?php echo Form::text('sectname', '', ['class' => 'form-control', 'placeholder' => 'Section']); ?>
+<?php echo Form::select('sectname', $section_val, null, ['class'=>'form-control']) ?>
 </div>
 <div class="form-group">
-<?php echo Form::label('schooolyr', 'School Year'); ?>
-<?php echo Form::text('schooolyr', '', ['class' => 'form-control', 'placeholder' => 'School Year']); ?>
+<?php echo Form::label('yr_from', 'School Year From'); ?>
+<?php echo Form::text('yr_from', '', ['class' => 'form-control', 'placeholder' => 'School Year From']); ?>
+</div>
+<div class="form-group">
+<?php echo Form::label('yr_to', 'School Year To'); ?>
+<?php echo Form::text('yr_to', '', ['class' => 'form-control', 'placeholder' => 'School Year To']); ?>
 </div>
 <div class="form-group">
 <?php echo Form::label('classgrade', 'Class Grade'); ?>
 <?php echo Form::select('classgrade', ['1' => '1', '2' => '2'], null, ['class'=>'form-control']) ?>
 </div>
 <div class="form-group">
-<button>Submit</button>
+<button class='btn btn-md btn-primary'>Submit</button>
 </div>
 </div>
 {!! Form::close() !!}

@@ -1,5 +1,9 @@
 @extends('layouts.dashboardLayout')
 
+@section('metas')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+@endsection
+
 @section('content')
 
 <div class='row'>
@@ -27,16 +31,60 @@
 <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
 <script src="{{ asset('assets/datatables-buttons/js/dataTables.buttons.min.js') }}"></script>
 <script src="{{ asset('assets/datatables-buttons/js/buttons.bootstrap4.min.js') }}"></script>
+<script src="{{ asset('assets/js/custom_api.js') }}"></script>
 <script>
 $(document).ready(function(){
-	$("#datatable").DataTable({
-		"processing": true,
-        "serverSide": true,
-        "ajax": {
-        	url : "http://localhost/calaparan/public/api/data-students",
-        	method : 'post'
+
+var dt = new DataTable();
+
+dt.listStudent(function(table){
+
+	$('#datatable tbody').on('click', '.show-detail', function () {
+		var tr = $(this).closest('tr');
+        var row = table.row( tr );
+        var data = row.data();
+        var _table = dt.show_details(table);
+        var __table = $(_table).clone();
+        var tbody = $(__table).find('tbody');
+        
+        for(var i in data['enrolls']){
+        	var enroll = data['enrolls'][i];
+        	var tr = $("<tr>");
+        	var td = $("<td>");
+        	var a = $("<a>");
+        	a.addClass('btn btn-md btn-info')
+        	a.attr({"href" : enroll['url']})
+        	a.text("Records")
+        	td.text(enroll['gradeyr'])
+        	tr.append(td)
+        	td = $("<td>");
+        	td.text(enroll['yr_from'])
+        	tr.append(td)
+        	td = $("<td>");
+        	td.text(enroll['yr_to'])
+        	tr.append(td)
+        	td = $("<td>");
+        	td.text(enroll['section'])
+        	tr.append(td)
+        	td = $("<td>");
+        	td.append(a)
+        	tr.append(td)
+        	tbody.append(tr)
         }
+
+        if ( row.child.isShown() ) {
+            row.child.hide();
+            tr.removeClass('shown');
+        }
+        else {
+            row.child( __table ).show();
+            tr.addClass('shown');
+        }
+
 	});
+
+})
+
 })
 </script>
 @endpush

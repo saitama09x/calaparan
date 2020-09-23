@@ -29,7 +29,8 @@ Route::prefix('ajax-json')->group(function() {
 	Route::post('data-insert-record', 'RecordsController@api_insert_records');
 	Route::post('data-insert-remarks', 'RecordsController@api_insert_remarks');
 	Route::get('data-show-student', 'StudentController@api_show');
-	
+	Route::get('data-show-remedial', 'StudentController@api_remedial');
+	Route::post('data-insert-remedial', 'StudentController@api_insert_remedial');
 });
 
 
@@ -88,9 +89,13 @@ Route::middleware('auth:admin')->group(function(){
 		Route::post('subject/create', 'AdminController@subject_docreate')->name('subject_docreate');
 		
 		Route::get('enroll/list-students', 'StudentController@index')->name('enroll_students');
-		Route::get('enroll/student/{id}', 'StudentController@grade_enroll')->where('id', '[0-9]+')->name('admin-student-enroll');
+		
+		Route::get('enroll/student/{id}/', 'StudentController@grade_enroll')->where('id', '[0-9]+')->name('admin-student-enroll');
+
+		Route::get('enroll/print/{id}/', 'StudentController@print_form_137')->where('id', '[0-9]+')->name('admin-print-enroll');
 		
 		Route::post('grade-enroll/add', 'StudentController@grade_enroll_add')->name('admin-grade_enroll_add');
+
 		Route::post('grade-enroll/add-eligibility', 'StudentController@add_eligibities')->name('admin-add_eligibities');
 
 		Route::get('student/record/{id}', 'StudentController@grade_record')->where('id', '[0-9]+')->name('admin-student-record');

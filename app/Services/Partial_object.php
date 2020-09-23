@@ -37,8 +37,8 @@ class Partial_object{
 
 	function show_student_enroll($obj, $enroll){
 
-		if($enroll->student()->count()){
-			$obj['student'] = $enroll->student()->first();
+		if($enroll->first()->student()->count()){
+			$obj['student'] = $enroll->first()->student()->first();
 		}
 
 		$records = $enroll->records()->get();
@@ -51,10 +51,12 @@ class Partial_object{
 			$obj['records'] = $recdata;
 		}
 
-		$remarks = $enroll->remarks()->get();
-		if($remarks->count()){
+		$enrolls = $enroll->get();
+
+		if($enrolls->count()){
 			$rem_arr = [];
-			foreach($remarks as $rem){
+			foreach($enrolls as $rem){
+				print_r($rem->first()->remarks);
 				$rem_arr[$rem->subjcode] = $rem->remarks;
 			}
 			$obj['remarks'] = $rem_arr;

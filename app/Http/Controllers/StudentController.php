@@ -7,8 +7,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
-use App\Models\{Students, Student_enrolls, Teachers, 
-	Grade_sections, Credentials, Schools, Student_eligibles};
+use App\Models\{
+	Students, Student_enrolls, Teachers, 
+	Grade_sections, Credentials, Schools, 
+	Student_eligibles, Student_records, Student_remedials
+};
 use App\Services\Partial_object;
 
 class StudentController extends Controller{
@@ -60,18 +63,94 @@ class StudentController extends Controller{
 	function api_show(Request $r){
 		$enroll_id = $r->query('id');
 
-		$enroll = Student_enrolls::find($enroll_id);
+		$records = Student_records::where("enroll_id", $enroll_id)->get();
 
 		$obj = [
 			'student' => [],
-			'enrolls' => $enroll,
-			'records' => [],
+			'enrolls' => [],
+			'records' => $records,
 			'remarks' => []
 		];
 
-		$obj = $this->partial->show_student_enroll($obj, $enroll);
-
 		return view('students.dom_showStudent', $obj);
+	}
+
+	function api_remedial(Request $r){
+		$enroll_id = $r->query('id');
+
+		$remedial = Student_remedials::where("enroll_id", $enroll_id)->get();
+
+		$obj = [
+			'student' => [],
+			'enrolls' => [],
+			'records' => [],
+			'remarks' => [],
+			'remedial' => $remedial
+		];
+
+		return view('students.dom_showRemedial', $obj);
+	}
+
+	function api_insert_remedial(Request $r){
+		$subjects = json_decode($r->subjects);
+		$finalval = $r->finalval;
+		$markval = $r->markval;
+		$recomval = $r->recomval;
+		$remval = $r->remval;
+		$enroll_id = $r->enroll_id;
+		$remdate_from = $r->remdate_from;
+		$remdate_to = $r->remdate_to;
+
+		$del = Student_remedials::where("enroll_id", $enroll_id)->whereNotIn("subjcode", $subjects);
+		if($del->exists()){
+			$del->delete();	
+		}
+		
+		if(count($subjects)){
+			foreach($subjects as $a){
+				
+				$update = Student_remedials::where([
+					[
+					'enroll_id', '=', $enroll_id
+					],
+					[
+					'subjcode', '=', $a
+					],
+				]);
+
+				if($update->exists()){
+
+					$update->update(
+						[
+							'final_rating' => $finalval[$a],
+							'remedial_mark' => $markval[$a],
+							'refinal_rating' => $recomval[$a],
+							'remarks' => $remval[$a],
+							'date_from' => $remdate_from,
+							'date_to' => $remdate_to,
+						]
+					);
+				}else{
+
+					$new = new Student_remedials();
+					$new->enroll_id = $enroll_id;
+					$new->subjcode = $a;
+					$new->final_rating = $finalval[$a];
+					$new->remedial_mark = $markval[$a];
+					$new->refinal_rating = $recomval[$a];
+					$new->remarks = $remval[$a];
+					$new->date_from = $remdate_from;
+					$new->date_to = $remdate_to;
+					$new->save();
+
+				}
+				
+			}
+
+		}
+
+
+		return response()->json(['status' => true]);
 	}
 
 
@@ -93,17 +172,16 @@ class StudentController extends Controller{
 
 	function grade_record($enroll_id){
 
-		$enroll = Student_enrolls::find($enroll_id);
+		$enroll = Student_enrolls::find($enroll_id)->first();
+		$remedial = Student_remedials::where("enroll_id", $enroll_id)->get();
 
 		$obj = [
-			'student' => [],
+			'student' => $enroll->student,
 			'enrolls' => $enroll,
 			'records' => [],
-			'remarks' => []
+			'remarks' => [],
+			'remedial' => $remedial
 		];
-		
-
-		$obj = $this->partial->show_student_enroll($obj, $enroll);
 		
 		return view('students.showStudent', $obj);
 	}
@@ -184,7 +262,9 @@ class StudentController extends Controller{
 			'school' => $school
 		];
 
+		
 		return view('students.grade_enroll', $obj);
+		
 	}
 
 	function grade_enroll_add(Request $r){
@@ -235,6 +315,27 @@ class StudentController extends Controller{
 			}
 		}
 		
+	}
+
+	function print_form_137($student_id){
+
+		$student = Students::find($student_id);	
+		$gradeyr = Teachers::groupyr()->get();
+		$credentials = Credentials::all();
+		$school = Schools::all();
+		$enrolls = Student_enrolls::studentId($student_id)->get();
+
+		$obj = [
+			'student' => $student,
+			'gradeyr' => $gradeyr,
+			'credential' => $credentials,
+			'school' => $school,
+			'enrolls' => $enrolls
+		];
+
+		
+		return view('prints.form_137', $obj);
+
 	}
 
 }

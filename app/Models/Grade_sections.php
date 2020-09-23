@@ -20,7 +20,7 @@ class Grade_sections extends Model{
         'date_updated',
     ];
 
-     protected $casts = [
+    protected $casts = [
         'date_created' => 'date'
     ];
 

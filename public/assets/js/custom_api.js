@@ -42,6 +42,29 @@ function API(){
 		})
 	}
 
+	this.remedial_load = function(enroll_id, func){
+		instance.get('data-show-remedial', {
+			params: {
+		      id: enroll_id
+		    }
+		}).then(function(res){
+			if(res.status == 200){
+				func(res.data)
+			}
+		})
+	}
+
+	this.insert_remedial = function(obj, func){
+		instance.post('data-insert-remedial', obj, [{
+
+		}]).then(function(res){
+			if(res.status == 200){
+				func(res.data)
+			}
+		})
+
+	}
+
 }
 
 function DataTable(){
