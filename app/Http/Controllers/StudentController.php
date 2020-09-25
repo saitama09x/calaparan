@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\{
 	Students, Student_enrolls, Teachers, 
 	Grade_sections, Credentials, Schools, 
-	Student_eligibles, Student_records, Student_remedials
+	Student_eligibles, Student_records, 
+	Student_remedials, Student_values, Student_values_recs
 };
 use App\Services\Partial_object;
 
@@ -96,7 +97,6 @@ class StudentController extends Controller{
 		$finalval = $r->finalval;
 		$markval = $r->markval;
 		$recomval = $r->recomval;
-		$remval = $r->remval;
 		$enroll_id = $r->enroll_id;
 		$remdate_from = $r->remdate_from;
 		$remdate_to = $r->remdate_to;
@@ -138,7 +138,6 @@ class StudentController extends Controller{
 					$new->final_rating = $finalval[$a];
 					$new->remedial_mark = $markval[$a];
 					$new->refinal_rating = $recomval[$a];
-					$new->remarks = $remval[$a];
 					$new->date_from = $remdate_from;
 					$new->date_to = $remdate_to;
 					$new->save();
@@ -151,6 +150,30 @@ class StudentController extends Controller{
 
 
 		return response()->json(['status' => true]);
+	}
+
+	function api_remarks_remedial(Request $r){
+
+		$subjcode = $r->subjcode;
+		$enroll_id = $r->enroll_id;
+		$value = $r->value;
+
+		$status = false;
+
+		$find = Student_remedials::where(
+			'enroll_id', '=', $enroll_id
+		)->where('subjcode', '=', $subjcode);
+
+		if($find->exists()){
+			$find->update(
+				['remarks' => $value]
+			);
+
+			$status = true;
+		}
+
+		return response()->json(['status' => $status]);
+
 	}
 
 
@@ -172,14 +195,24 @@ class StudentController extends Controller{
 
 	function grade_record($enroll_id){
 
-		$enroll = Student_enrolls::find($enroll_id)->first();
+		$enroll = Student_enrolls::where("id", $enroll_id)->first();
 		$remedial = Student_remedials::where("enroll_id", $enroll_id)->get();
+		$recordVals = Student_values_recs::where('enroll_id', $enroll_id)->get();
+		$corevalues = Student_values::all();
 
+		$core_arr = [];
+		if($corevalues->count()){
+			foreach($corevalues as $v){
+				$core_arr[$v->catval_id]['key'] = $v->catlabel;
+				$core_arr[$v->catval_id]['val'][] = ["content" => $v->behavior, "id" => $v->coreval_id];
+			}
+		}
+		
 		$obj = [
 			'student' => $enroll->student,
 			'enrolls' => $enroll,
-			'records' => [],
-			'remarks' => [],
+			'recordVals' => $recordVals,
+			'core_arr' => $core_arr,
 			'remedial' => $remedial
 		];
 		
@@ -336,6 +369,29 @@ class StudentController extends Controller{
 		
 		return view('prints.form_137', $obj);
 
+	}
+
+	function print_grade_records($enroll_id){
+
+		$enrolls = Student_records::where('enroll_id', $enroll_id)->get();
+		$recordVals = Student_values_recs::where('enroll_id', $enroll_id)->get();
+		$corevalues = Student_values::all();
+
+		$core_arr = [];
+		if($corevalues->count()){
+			foreach($corevalues as $v){
+				$core_arr[$v->catval_id]['key'] = $v->catlabel;
+				$core_arr[$v->catval_id]['val'][] = ["content" => $v->behavior, "id" => $v->coreval_id];
+			}
+		}
+
+		$obj = [
+			'enrolls' => $enrolls,
+			'recordVals' => $recordVals,
+			'core_arr' => $core_arr
+		];
+
+		return view('prints.single_records', $obj);
 	}
 
 }

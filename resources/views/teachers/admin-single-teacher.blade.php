@@ -20,7 +20,7 @@
 	@foreach($teacher->enrolls as $t)
 		<tr>
 			<td>{{$t->student->fname . " " . $t->student->lname}}</td>
-			<td><a href="{{route('single_student', $t->student_id)}}">Records</a></td>
+			<td><a href="{{route('admin-student-record', $t->id)}}">Records</a></td>
 		</tr>
 	@endforeach
 </tbody>
