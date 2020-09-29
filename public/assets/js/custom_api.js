@@ -65,6 +65,29 @@ function API(){
 
 	}
 
+	this.insert_remarks_remedial = function(obj, func){
+		instance.post('data-remarks-remedial', obj, [{
+
+		}]).then(function(res){
+			if(res.status == 200){
+				func(res.data)
+			}
+		})
+
+	}
+
+	this.insert_core_values = function(obj, func){
+
+		instance.post('insert-core-values', obj, [{
+
+		}]).then(function(res){
+			if(res.status == 200){
+				func(res.data)
+			}
+		})
+
+	}
+
 }
 
 function DataTable(){

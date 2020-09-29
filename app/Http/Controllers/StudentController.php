@@ -176,6 +176,78 @@ class StudentController extends Controller{
 
 	}
 
+	function api_insert_values(Request $r){
+
+		$enroll_id = $r->enroll_id;
+		$quarter = $r->quarter;
+		$data = $r->data;
+
+
+		foreach($data as $d){
+			
+			$update = Student_values_recs::where([
+				['enroll_id', '=', $enroll_id],
+				['coreval_id', '=', $d['id']]
+			]);
+
+			if(!$update->exists()){
+				$new = new Student_values_recs;
+				$new->enroll_id = $enroll_id;
+				$new->coreval_id = $d['id'];
+
+				if($quarter == 1){
+					$new->first_qtr = $d['val'];
+				}
+				
+				if($quarter == 2){
+					$new->qtr_second = $d['val'];
+				}
+				
+				if($quarter == 3){
+					$new->qtr_third = $d['val'];
+				}
+
+				if($quarter == 4){
+					$new->qtr_fourth = $d['val'];
+				}
+
+				$new->date_created = time();
+				$new->date_updated = time();
+
+				$new->save();
+			}
+			else{
+				
+				$quarter_col = "";
+
+				if($quarter == 1){
+					$quarter_col = "first_qtr";
+				}
+				
+				if($quarter == 2){
+					$quarter_col = "qtr_second";
+				}
+				
+				if($quarter == 3){
+					$quarter_col = "qtr_third";
+				}
+
+				if($quarter == 4){
+					$quarter_col = "qtr_fourth";
+				}
+
+				$update->update([
+					$quarter_col => $d['val'],
+					'date_updated' => date("Y-m-d", time())
+				]);
+
+			}
+
+		}
+
+		return response()->json(['status' => true]);
+	}
+
 
 	function show($id){
 
@@ -200,18 +272,42 @@ class StudentController extends Controller{
 		$recordVals = Student_values_recs::where('enroll_id', $enroll_id)->get();
 		$corevalues = Student_values::all();
 
+		$recordVal_arr = [];
+		if($recordVals->count()){
+			foreach($recordVals as $r){
+				$recordVal_arr[$r->coreval_id] = [
+					'first_qtr' => $r->first_qtr,
+					'qtr_second' => $r->qtr_second,
+					'qtr_third' => $r->qtr_third,
+					'qtr_fourth' => $r->qtr_fourth,
+				];
+			}
+		}
+
 		$core_arr = [];
 		if($corevalues->count()){
 			foreach($corevalues as $v){
+				$values_arr = ['first' => '', 'second' => '', 'third' => '', 'fourth' => ''];
+				
+				if(isset($recordVal_arr[$v->coreval_id])){
+					$values_arr['first'] = $recordVal_arr[$v->coreval_id]['first_qtr'];
+					$values_arr['second'] = $recordVal_arr[$v->coreval_id]['qtr_second'];
+					$values_arr['third'] = $recordVal_arr[$v->coreval_id]['qtr_third'];
+					$values_arr['fourth'] = $recordVal_arr[$v->coreval_id]['qtr_fourth'];
+				}
+
 				$core_arr[$v->catval_id]['key'] = $v->catlabel;
-				$core_arr[$v->catval_id]['val'][] = ["content" => $v->behavior, "id" => $v->coreval_id];
+				$core_arr[$v->catval_id]['val'][] = ["content" => $v->behavior, "id" => $v->coreval_id, "values" => $values_arr];
 			}
 		}
 		
+		
+
 		$obj = [
 			'student' => $enroll->student,
 			'enrolls' => $enroll,
 			'recordVals' => $recordVals,
+			'recordVal_arr' => $recordVal_arr,
 			'core_arr' => $core_arr,
 			'remedial' => $remedial
 		];
@@ -377,11 +473,33 @@ class StudentController extends Controller{
 		$recordVals = Student_values_recs::where('enroll_id', $enroll_id)->get();
 		$corevalues = Student_values::all();
 
+		$recordVal_arr = [];
+		if($recordVals->count()){
+			foreach($recordVals as $r){
+				$recordVal_arr[$r->coreval_id] = [
+					'first_qtr' => $r->first_qtr,
+					'qtr_second' => $r->qtr_second,
+					'qtr_third' => $r->qtr_third,
+					'qtr_fourth' => $r->qtr_fourth,
+				];
+			}
+		}
+
 		$core_arr = [];
 		if($corevalues->count()){
 			foreach($corevalues as $v){
+
+				$values_arr = ['first' => '', 'second' => '', 'third' => '', 'fourth' => ''];
+				
+				if(isset($recordVal_arr[$v->coreval_id])){
+					$values_arr['first'] = $recordVal_arr[$v->coreval_id]['first_qtr'];
+					$values_arr['second'] = $recordVal_arr[$v->coreval_id]['qtr_second'];
+					$values_arr['third'] = $recordVal_arr[$v->coreval_id]['qtr_third'];
+					$values_arr['fourth'] = $recordVal_arr[$v->coreval_id]['qtr_fourth'];
+				}
+
 				$core_arr[$v->catval_id]['key'] = $v->catlabel;
-				$core_arr[$v->catval_id]['val'][] = ["content" => $v->behavior, "id" => $v->coreval_id];
+				$core_arr[$v->catval_id]['val'][] = ["content" => $v->behavior, "id" => $v->coreval_id, "values" => $values_arr];
 			}
 		}
 
