@@ -11,7 +11,8 @@ use App\Models\{
 	Students, Student_enrolls, Teachers, 
 	Grade_sections, Credentials, Schools, 
 	Student_eligibles, Student_records, 
-	Student_remedials, Student_values, Student_values_recs
+	Student_remedials, Student_values, Student_values_recs,
+	Subjects
 };
 use App\Services\Partial_object;
 
@@ -404,6 +405,7 @@ class StudentController extends Controller{
 		$yr_to = date("Y-m-d", strtotime($r->year_to));
 
 		$find_enroll = Student_enrolls::where('student_id', '=', $id)->where('gradeyr', '=', $gradeyr);
+
 		$eligible = Student_eligibles::where('student_id', $id)->get();
 
 		if(!$find_enroll->exists()){
@@ -416,6 +418,24 @@ class StudentController extends Controller{
 			$new->school_id = $eligible->first()->school_id;
 			$new->datecreated = date("Y-m-d", time());
 			if($new->save()){
+				
+				$find_subj = Subjects::where("gradelevel", $new->gradeyr)->get();
+
+				if($find_subj->count()){
+					foreach($find_subj as $sub){
+						$record = new Student_records;
+						$record->enroll_id = $new->id;
+						$record->subjcode = $sub->subjcode;
+						$record->qtr_first = 0;
+						$record->qtr_second = 0;
+						$record->qtr_third	 = 0;
+						$record->qtr_fourth = 0;
+						$record->final_rate = 0;
+						$record->datecreated = date("Y-m-d", time());
+						$record->save();
+					}
+				}
+
 				if(Auth::guard('web')->check()){
 					return redirect()->route('grade-enroll', ['id' => $id] );
 				}
@@ -453,13 +473,34 @@ class StudentController extends Controller{
 		$credentials = Credentials::all();
 		$school = Schools::all();
 		$enrolls = Student_enrolls::studentId($student_id)->get();
+		
+		$remedial_arr = [];
+		if($enrolls->count()){
+			foreach($enrolls as $e){
+				$find = Student_remedials::where("enroll_id", $e->id)->get();
+				if($find->count()){
+					foreach($find as $f){
+						$remedial_arr[$f->enroll_id][] = (object) [
+							'subject' => $f->subject->subjname,
+							'final_rating' => $f->final_rating,
+							'remedial_mark' => $f->remedial_mark,
+							'refinal_rating' => $f->refinal_rating,
+							'remarks' => $f->remarks,
+							'date_from' => $f->date_from,
+							'date_to' => $f->date_to
+						];
+					}
+				}
+			}
+		}
 
 		$obj = [
 			'student' => $student,
 			'gradeyr' => $gradeyr,
 			'credential' => $credentials,
 			'school' => $school,
-			'enrolls' => $enrolls
+			'enrolls' => $enrolls,
+			'remedials' => $remedial_arr
 		];
 
 		
@@ -471,6 +512,8 @@ class StudentController extends Controller{
 
 		$enrolls = Student_records::where('enroll_id', $enroll_id)->get();
 		$recordVals = Student_values_recs::where('enroll_id', $enroll_id)->get();
+		$remedials = Student_remedials::where("enroll_id", $enroll_id)->get();
+
 		$corevalues = Student_values::all();
 
 		$recordVal_arr = [];
@@ -506,6 +549,7 @@ class StudentController extends Controller{
 		$obj = [
 			'enrolls' => $enrolls,
 			'recordVals' => $recordVals,
+			'remedials' => $remedials,
 			'core_arr' => $core_arr
 		];
 
