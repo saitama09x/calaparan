@@ -10,7 +10,7 @@
 	@endcomponent
 @endif
 <div class='form-group'>
-<a href="#" class="btn btn-md btn-info">Print Report Card</a>
+<a href="{{route('admin-print-enroll', $student->id)}}" target="_blank" class="btn btn-md btn-info">Print School Records</a>
 </div>
 <div class="card card-primary">
 <div class="card-header">
@@ -20,16 +20,40 @@
 <table class='table'>
 <tbody>
 <tr>
-<th>Name:</th>
-<td>{{ $student->fname . ' ' . $student->mname . ' ' . $student->lname . ' ' . $student->exname}}</td>
-<th>Birthday:</th>
-<td>{{ $student->bday }}</td>
+<td><strong class='mr-2'>Last Name:</strong> <span>{{$student->lname}}</span></td>
+<td><strong class='mr-2' class='mr-2'>First Name:</strong> <span>{{$student->fname}}</span></td>
+<td><strong class='mr-2'>Middle Name:</strong> <span>{{$student->mname}}</span></td>
+<td><strong class='mr-2'>LRN:</strong> <span>{{$student->lrefno}}</span></td>
 </tr>
+
 <tr>
-	<th>Gender:</th>
-	<td>{{ $student->sex }}</td>
-	<th>Date Created:</th>
-	<td>{{ $student->datecreated }}</td></tr>
+<td><strong class='mr-2'>Birthday:</strong> <span>{{ $student->bday }}</span></td>
+<td><strong class='mr-2'>Gender:</strong><span> {{ $student->sex }}</span></td>
+<td><strong class='mr-2'>Date Created:</strong> <span>{{ $student->datecreated }}</span></td>
+</tr>
+
+<tr>
+<td><strong class='mr-2'>Mother:</strong> <span>{{ $student->mother }}</span></td>
+<td><strong class='mr-2'>Highest Educational Attainment::</strong><span> {{ $student->edu_one }}</span></td>
+<td><strong class='mr-2'>Occupation:</strong> <span>{{ $student->occu_one }}</span></td>
+<td><strong class='mr-2'>Contact Number:</strong> <span>{{ $student->cont_one }}</span></td>
+</tr>
+
+
+<tr>
+<td><strong class='mr-2'>Father:</strong> <span>{{ $student->father }}</span></td>
+<td><strong class='mr-2'>Highest Educational Attainment::</strong><span> {{ $student->edu_two }}</span></td>
+<td><strong class='mr-2'>Occupation:</strong> <span>{{ $student->occu_two }}</span></td>
+<td><strong class='mr-2'>Contact Number:</strong> <span>{{ $student->cont_two }}</span></td>
+</tr>
+
+<tr>
+<td><strong class='mr-2'>Guardian:</strong> <span>{{ $student->guardian }}</span></td>
+<td><strong class='mr-2'>Highest Educational Attainment::</strong><span> {{ $student->edu_three }}</span></td>
+<td><strong class='mr-2'>Occupation:</strong> <span>{{ $student->occu_three }}</span></td>
+<td><strong class='mr-2'>Contact Number:</strong> <span>{{ $student->cont_three }}</span></td>
+</tr>
+
 </tbody>
 </table>
 </div>
@@ -122,9 +146,9 @@
 <div class='form-group'>
 <div class='row'>
 <div class='col-md d-flex'>
-<label class="mr-2"><strong>Year From:</strong> <input type='text' class='form-control datepicker' value="{{$adviser[$yr->classgrade]['yr_from']}}" name='year_from' /></label>
+<label class="mr-2"><strong>Year From:</strong> <input type='text' class='form-control datepicker' value="{{$adviser[$yr->classgrade]['yr_from']}}" name='year_from' autocomplete='off'/></label>
 <label>
-<strong>Year To:</strong> <input type='text' class='form-control datepicker' value="{{$adviser[$yr->classgrade]['yr_to']}}" name='year_to' /></label>
+<strong>Year To:</strong> <input type='text' class='form-control datepicker' value="{{$adviser[$yr->classgrade]['yr_to']}}" name='year_to' autocomplete='off'/></label>
 </div>
 <div class='col-md d-flex align-items-center'>
 <a href="{{route('admin-student-record', $adviser[$yr->classgrade]['enroll_id'])}}" class='btn btn-md btn-info'>Records</a>

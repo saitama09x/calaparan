@@ -148,9 +148,10 @@ class AdminController extends Controller{
 		$subject = Subjects::all();
 		$parents = [];
 		foreach($subject as $s){
-			$has_par = $s->parent_subject($s->id);
+			$has_par = $s->parent_subject($s->parent_id);
+
 			if($has_par->exists()){
-				$parents[$has_par->first()->subjcode] = $s->subjname;
+				$parents[$s->parent_id] = $has_par->first()->subjname;
 			}
 		}
 

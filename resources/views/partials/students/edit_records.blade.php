@@ -10,35 +10,34 @@
 		Select Quarter
 	</div>
 	<div class='form-group'>
-		<label>
-			<input type='radio' name="quarter" value="1"/>1st
+		<label class='mr-2'>
+			<input type='radio' name="quarter" value="1" checked/>1st
 		</label>
-		<label>
+		<label class='mr-2'>
 			<input type='radio' name="quarter" value="2"/>2nd
 		</label>
-		<label>
+		<label class='mr-2'>
 			<input type='radio' name="quarter" value="3"/>3rd
 		</label>
-		<label>
+		<label class='mr-2'>
 			<input type='radio' name="quarter" value="4"/>4th
 		</label>
-		<label>
+		<label class='mr-2'>
 			<input type='radio' name="quarter" value="5"/>Final
 		</label>
 	</div>
 	<div class='form-group'>
 		<table class='table'>
-		<thead><tr><th>Learning Areas</th></tr></thead>
+			<tbody>
 			@if(!empty($enrolls))
-				@if($enrolls->teacher->count())
-					@if($enrolls->teacher->subjects->count())
-						@foreach($enrolls->teacher->subjects as $s)
-							<tr><td>{{$s->subjects->subjname}}</td>
-								<td><input type='number' name='gradeval[]' data-id="{{$s->subjects->subjcode}}" class='form-control'/></td></tr>
-						@endforeach
-					@endif
+				@if($enrolls->records->count())
+					@foreach($enrolls->records as $s)
+						<tr><td>{{$s->subject->subjname}}</td>
+							<td><input type='number' name='gradeval[]' data-id="{{$s->subject->subjcode}}" value="{{$s->qtr_first}}" class='form-control'/></td></tr>
+					@endforeach
 				@endif
 			@endif
+			</tbody>
 		</table>
 	</div>
 	</form>

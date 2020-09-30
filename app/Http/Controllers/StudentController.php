@@ -15,6 +15,7 @@ use App\Models\{
 	Subjects
 };
 use App\Services\Partial_object;
+use App\Http\Requests\StudentValidator;
 
 class StudentController extends Controller{
 	
@@ -32,18 +33,34 @@ class StudentController extends Controller{
 
 	}
 
-	function store(Request $r){
+	function store(StudentValidator $r){
 
+		$data = $r->validated();	
+		 
 		$student = new Students;
 
 		$student->fname = $r->fname;
 		$student->lname = $r->lname;
 		$student->exname = $r->exname;
 		$student->mname = $r->mname;
-		$student->bday = date("Y-m-d", strtotime($r->bday));
+		$student->bday = strtotime($r->bday);
 		$student->sex = $r->sex;
-		$student->datecreated = date("Y-m-d H:i:s", time());
-		
+		$student->lrefno = $r->lrefno;
+		$student->mother = $r->moname;
+		$student->edu_one = $r->edu_one;
+		$student->occu_one = $r->occu_one;
+		$student->cont_one = $r->cont_one;
+		$student->father = $r->faname;
+		$student->edu_two = $r->edu_two;
+		$student->occu_two = $r->occu_two;
+		$student->cont_two = $r->cont_two;
+		$student->guardian = $r->guardian;
+		$student->edu_three = $r->edu_three;
+		$student->occu_three = $r->occu_three;
+		$student->cont_three = $r->cont_three;
+		$student->datecreated = time();
+		$student->dateupdated = time();
+
 		if($student->save()){
 			return redirect('/admin/enroll/student/' . $student->id)->with('is_added', true);
 		}
@@ -67,10 +84,50 @@ class StudentController extends Controller{
 
 		$records = Student_records::where("enroll_id", $enroll_id)->get();
 
+		if($records->count()){
+			$grades_arr = [];
+			foreach($records as $r){
+				if($r->subject->parent_id == 0){
+					$grades_arr[$r->subject->subjcode] = [
+						'children' => [],
+						'subject' => $r->subject->subjname,
+						'subcode' => $r->subject->subjcode,
+						'enroll_id' => $r->enroll_id,
+						'first' => $r->qtr_first,
+						'second' => $r->qtr_second,
+						'third' => $r->qtr_third,
+						'fourth' => $r->qtr_fourth,
+						'final' => $r->final_rate,
+						'remarks' => $r->remarks
+					];
+				}
+				else{
+					
+					$parent = Subjects::where('id', $r->subject->parent_id)->get();
+
+					if($parent->count()){
+						$grades_arr[$parent->first()->subjcode]['children'][] = [
+							'subject' => $r->subject->subjname,
+							'subcode' => $r->subject->subjcode,
+							'enroll_id' => $r->enroll_id,
+							'first' => $r->qtr_first,
+							'second' => $r->qtr_second,
+							'third' => $r->qtr_third,
+							'fourth' => $r->qtr_fourth,
+							'final' => $r->final_rate,
+							'remarks' => $r->remarks
+						];
+					}
+				}
+			}
+
+		}
+
 		$obj = [
 			'student' => [],
 			'enrolls' => [],
 			'records' => $records,
+			'grades' => $grades_arr,
 			'remarks' => []
 		];
 
@@ -81,7 +138,7 @@ class StudentController extends Controller{
 		$enroll_id = $r->query('id');
 
 		$remedial = Student_remedials::where("enroll_id", $enroll_id)->get();
-
+		
 		$obj = [
 			'student' => [],
 			'enrolls' => [],
@@ -249,6 +306,40 @@ class StudentController extends Controller{
 		return response()->json(['status' => true]);
 	}
 
+	function api_qtr_record(Request $r){
+		$enroll_id = $r->query('id');
+		$qtr = $r->query('qtr');
+
+		$records = Student_records::where('enroll_id', $enroll_id)->get();
+
+		$records_arr = [];
+		if($records->count()){
+			foreach($records as $rec){
+				$grades = 0;
+				if($qtr == 1){
+					$grades = $rec->qtr_first;
+				}
+				else if($qtr == 2){
+					$grades = $rec->qtr_second;
+				}
+				else if($qtr == 3){
+					$grades = $rec->qtr_third;
+				}
+				else if($qtr == 4){
+					$grades = $rec->qtr_fourth;
+				}
+				else if($qtr == 5){
+					$grades = $rec->final_rate;
+				}
+
+				$records_arr[$rec->subjcode] = $grades;
+			}
+
+		}
+
+		return response()->json(['status' => true, 'records' => $records_arr]);
+
+	}
 
 	function show($id){
 
@@ -419,7 +510,7 @@ class StudentController extends Controller{
 			$new->datecreated = date("Y-m-d", time());
 			if($new->save()){
 				
-				$find_subj = Subjects::where("gradelevel", $new->gradeyr)->get();
+				$find_subj = Subjects::all();
 
 				if($find_subj->count()){
 					foreach($find_subj as $sub){

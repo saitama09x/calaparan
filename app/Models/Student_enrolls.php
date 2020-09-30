@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\{Students, Grade_sections, Grade_subjects, Student_records, Student_remarks, Teachers, Schools};
+use App\Models\{Students, Grade_sections, Grade_subjects, Student_records, Student_remarks, Teachers, Schools, Subjects};
 
 class Student_enrolls extends Model{
 
@@ -18,6 +18,10 @@ class Student_enrolls extends Model{
 /*	function section(){
 		return $this->belongsTo(Grade_sections::class, 'section_id', 'id');
 	}*/
+
+	function subject_level(){
+		return $this->hasMany(Subjects::class, 'gradelevel', 'gradeyr');
+	}
 
 	function records(){
 		return $this->hasMany(Student_records::class, 'enroll_id', 'id');
@@ -43,7 +47,7 @@ class Student_enrolls extends Model{
 	}
 
 	function scopeStudentId($query, $id){
-		return $query->where("student_id", $id)->latest();
+		return $query->where("student_id", $id)->oldest();
 	}
 
 	function scopeFindteacher($query, $teacher_id){

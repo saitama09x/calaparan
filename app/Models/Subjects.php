@@ -32,8 +32,8 @@ class Subjects extends Model{
 		return $this->hasOne(Student_records::class, 'subjcode', 'subjcode');
 	}
 	
-	function scopeParent_subject($query, $id){
-		return $query->where('parent_id', $id);
+	function scopeParent_subject($query, $parent_id){
+		return $query->where('id', $parent_id);
 	}
 
 }

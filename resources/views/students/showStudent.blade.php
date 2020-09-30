@@ -39,7 +39,9 @@
 @endpush
 
 @section('content')
-
+<div class='form-group'>
+<a href="{{route('admin-student-print-record', $enrolls->id)}}" target="_blank" class='btn btn-md btn-primary'>Print Record</a>
+</div>
 <div class='row'>
 <div class='col-md-12'>
 <div class="card card-primary">

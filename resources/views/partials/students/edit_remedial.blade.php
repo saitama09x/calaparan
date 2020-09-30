@@ -1,7 +1,7 @@
 @component('modals.edit_modal', ['modal_id' => 'remedial_modal'])
 
 @slot('modal_title')
- 	Remdial Records
+ 	Remedial Class Records
 @endslot
 
 @slot('modal_body')
@@ -27,9 +27,8 @@ if($remedial->count()){
 		<table class='table remedial-table'>
 		<thead><tr><th></th><th>Learning Areas</th><th>Final Rating</th><th>Remedial Class Mark</th><th>Recomputed Final Grade</th></tr></thead>
 			@if(!empty($enrolls))
-				@if($enrolls->teacher->count())
-					@if($enrolls->teacher->subjects->count())
-						@foreach($enrolls->teacher->subjects as $s)
+				@if($enrolls->records->count())
+						@foreach($enrolls->records as $s)
 							@php
 								$is_check = "";
 								$final = "";
@@ -38,7 +37,7 @@ if($remedial->count()){
 								$remval = "";
 								if($remedial->count()){
 									foreach($remedial as $r){
-										if($r->subjcode == $s->subjects->subjcode){
+										if($r->subjcode == $s->subjcode){
 											$is_check = "checked";
 											$final = $r->final_rating;
 											$markval = $r->remedial_mark;
@@ -49,14 +48,13 @@ if($remedial->count()){
 								}
 							@endphp
 							<tr>
-								<td><input type='checkbox' class="remedial-check" value="{{$s->subjects->subjcode}}" {{$is_check}}/></td>
-								<td>{{$s->subjects->subjname}}</td>
-								<td><input type='number' name='finalval[{{$s->subjects->subjcode}}]' class='form-control' value="{{$final}}"/></td>
-								<td><input type='text' name='markval[{{$s->subjects->subjcode}}]' class='form-control' value="{{$markval}}"/></td>
-								<td><input type='number' name='recomval[{{$s->subjects->subjcode}}]' value="{{$recomval}}" class='form-control'/></td>
+								<td><input type='checkbox' class="remedial-check" value="{{$s->subjcode}}" {{$is_check}}/></td>
+								<td>{{$s->subject->subjname}}</td>
+								<td><input type='number' name='finalval[{{$s->subjcode}}]' class='form-control' value="{{$final}}"/></td>
+								<td><input type='text' name='markval[{{$s->subjcode}}]' class='form-control' value="{{$markval}}"/></td>
+								<td><input type='number' name='recomval[{{$s->subjcode}}]' value="{{$recomval}}" class='form-control'/></td>
 							</tr>
 						@endforeach
-					@endif
 				@endif
 			@endif
 		</table>

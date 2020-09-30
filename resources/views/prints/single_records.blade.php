@@ -52,8 +52,8 @@
 		}
 
 		.records-label th{
-			width: 70px;
     		text-align: center;	
+    		padding:10px;
 		}
 
 		.records-label th{
@@ -103,7 +103,7 @@
 <div class='row'>
 	<div class='col-5 px'>
 		<div class='mb'>
-<table class='grade-table'>
+<table class='grade-table mb'>
 <thead class='records-label'>
 		<tr><th class='learn-col' rowspan="2">Learning Areas</th><th colspan="4">Quarterly Rating</th><th rowspan="2">Final Rate</th><th rowspan="2">Remarks</th></tr>
 		<tr><th>1</th><th>2</th><th>3</th><th>4</th></tr>
@@ -122,6 +122,42 @@
 @endforeach
 </tbody>
 </table>
+
+@php
+$date_from = "";
+$date_to = "";
+if($remedials->count()){
+	$date_from = $remedials->first()->date_from;
+	$date_to = $remedials->first()->date_to;
+}
+@endphp
+
+<table class='table'>
+<tbody class='records-label'>
+<th>Remedial Classes</th><td>Conducted from: <strong>{{$date_from}}</strong> To <strong>{{$date_to}}</strong></td>
+</tbody>
+</table>
+<table class='table'>
+<thead class='records-label'><tr><th>Learning Areas</th><th>Final Rating</th><th>Remedial Class Mark</th><th>Recomputed Final Grade</th><th>Remarks</th></tr></thead>
+<tbody>
+	@if($remedials->count())
+		@foreach($remedials as $r)
+			<tr>
+				<td>{{$r->subject->subjname}}</td>
+				<td class='text-center'>{{$r->final_rating}}</td>
+				<td class='text-center'>{{$r->remedial_mark}}</td>
+				<td class='text-center'>{{$r->refinal_rating}}</td>
+				<td>
+					{!!$r->remarks!!}
+				</td>		
+			</tr>
+		@endforeach
+	@else
+		<tr><td colspan="5"><strong><center>No remedial class records</center></strong></td></tr>
+	@endif
+</tbody>
+</table>
+
 </div>
 
 <table class='grade-legend'>

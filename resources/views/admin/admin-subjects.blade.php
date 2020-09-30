@@ -23,7 +23,7 @@
 						<tr>
 							<td>{{$s->subjcode}}</td>
 							<td>{{$s->subjname}}</td>
-							<td>{{isset($parents[$s->subjcode]) ? $parents[$s->subjcode] : '' }}</td>
+							<td>{{isset($parents[$s->parent_id]) ? $parents[$s->parent_id] : '' }}</td>
 							<td>{{$s->gradelevel}}</td>
 							<td><a href="#" class='btn btn-warning btn-md'>Edit</a></td>
 						</tr>
