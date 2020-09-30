@@ -15,6 +15,11 @@ class Teachers extends Model
         'section_id'
     ];
     
+    protected $casts = [
+        'datecreated' => 'date'
+    ];
+
+
     function section(){
     	return $this->belongsTo(Grade_sections::class, 'section_id', 'id');
     }
@@ -23,9 +28,9 @@ class Teachers extends Model
     	return $this->hasMany(Grade_subjects::class, 'teacher_id', 'id');
     }
 
-    function scopeGroupyr($query){
+    /*function scopeGroupyr($query){
     	return $query->select('classgrade')->groupBy("classgrade");
-    }
+    }*/
 
     function enrolls(){
         return $this->hasMany(Student_enrolls::class, 'teacher_id', 'id');

@@ -53,9 +53,10 @@
 		}
 		.row{
 			display:flex;
+			flex-wrap:wrap;
 		}
 		.col-5{
-			width:50%;
+			width:45%;
 		}
 		.px{
 			padding:0 7px;

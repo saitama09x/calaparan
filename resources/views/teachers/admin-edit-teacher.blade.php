@@ -8,18 +8,18 @@
 	<div class="card-header">
     <h3 class="card-title">Add Teacher Information</h3>
   </div>
-{!! Form::model($teachers, ['route' => 'teacher_docreate', 'method' => 'post']) !!}
+{!! Form::model($teacher, ['route' => ['teachers.update', $teacher->id], 'method' => 'PUT']) !!}
 <div class='card-body'>
 <div class="form-group">
 <?php echo Form::label('fullname', 'FullName'); ?>
-<?php echo Form::text('fullname', '', ['class' => 'form-control', 'placeholder' => 'FullName']); ?>
+<?php echo Form::text('fullname', $teacher->fullname, ['class' => 'form-control', 'placeholder' => 'FullName']); ?>
 </div>
 <div class="form-group">
 <?php echo Form::label('sectname', 'Section'); ?>
-<?php echo Form::select('sectname', $section_val, null, ['class'=>'form-control']) ?>
+<?php echo Form::select('sectname', $section_val, $teacher->section_id, ['class'=>'form-control']) ?>
 </div>
 <div class="form-group">
-<button class='btn btn-md btn-primary'>Submit</button>
+<button class='btn btn-md btn-primary'>Update</button>
 </div>
 </div>
 {!! Form::close() !!}

@@ -2,11 +2,28 @@
 
 @section('content')
 
+@if($errors->any())
+    <div class="alert alert-danger" role='alert'>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+      </button>
+      @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+      @endforeach
+    </div>
+@endif
+
+
 <div class='row'>
 <div class='col-md-12'>
 @if(session('is_added'))
 	@component('alerts.alert', ['alert_type' => 'alert-success'])
 		{{$student->fname . ' ' . $student->mname . ' ' . $student->lname}} is added
+	@endcomponent
+@endif
+@if(session('enroll_success'))
+	@component('alerts.alert', ['alert_type' => 'alert-success'])
+		{{session('enroll_success')}}
 	@endcomponent
 @endif
 <div class='form-group'>
@@ -134,32 +151,35 @@
 
 <div class='row'>
 @foreach($gradeyr as $index => $yr)
+@php
+	$year_label = ["Kinder", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"];
+@endphp
 <div class='col-md-12'>
 <div class="card card-primary">
 <div class="card-header">
-<h3 class="card-title">Enrollment Year {{$yr->classgrade}}</h3>
+<h3 class="card-title">Enrollment Year  - <strong>{{$year_label[$yr->gradelevel]}}</strong></h3>
 </div>
 <div class="card-body">
 {!! Form::model($student, ['route' => ['admin-grade_enroll_add'], 'method' => 'post']) !!}
-<?= Form::hidden('gradeyr', $yr->classgrade) ?>
+<?= Form::hidden('gradeyr', $yr->gradelevel) ?>
 <?= Form::hidden('student_id', $student->id) ?>
 <div class='form-group'>
 <div class='row'>
 <div class='col-md d-flex'>
-<label class="mr-2"><strong>Year From:</strong> <input type='text' class='form-control datepicker' value="{{$adviser[$yr->classgrade]['yr_from']}}" name='year_from' autocomplete='off'/></label>
+<label class="mr-2"><strong>Year From:</strong> <input type='text' class='form-control datepicker' value="{{$adviser[$yr->gradelevel]['yr_from']}}" name='year_from' autocomplete='off'/></label>
 <label>
-<strong>Year To:</strong> <input type='text' class='form-control datepicker' value="{{$adviser[$yr->classgrade]['yr_to']}}" name='year_to' autocomplete='off'/></label>
+<strong>Year To:</strong> <input type='text' class='form-control datepicker' value="{{$adviser[$yr->gradelevel]['yr_to']}}" name='year_to' autocomplete='off'/></label>
 </div>
 <div class='col-md d-flex align-items-center'>
-<a href="{{route('admin-student-record', $adviser[$yr->classgrade]['enroll_id'])}}" class='btn btn-md btn-info'>Records</a>
+<a href="{{route('admin-student-record', $adviser[$yr->gradelevel]['enroll_id'])}}" class='btn btn-md btn-info'>Records</a>
 </div>
 </div>
 </div>
 <table class='table'>
 	<thead><tr><th></th><th>Teacher Name</th><th>Section Name</th><th>Total Students</th></tr></thead>
 	<tbody>
-	@if(isset($adviser[$yr->classgrade]))
-		@foreach($adviser[$yr->classgrade]['data'] as $a)
+	@if(isset($adviser[$yr->gradelevel]))
+		@foreach($adviser[$yr->gradelevel]['data'] as $a)
 			<tr>
 				<td><?= Form::radio('teacher_id', $a->id, $a->is_selected) ?></td>
 				<td>{{$a->name}}</td>

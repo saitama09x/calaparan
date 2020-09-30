@@ -31,6 +31,11 @@ Route::prefix('ajax-json')->group(function() {
 	Route::get('data-show-student', 'StudentController@api_show');
 	Route::get('data-show-remedial', 'StudentController@api_remedial');
 	Route::post('data-insert-remedial', 'StudentController@api_insert_remedial');
+	Route::post('data-record-score', 'StudentController@api_record_score');
+	Route::post('data-remarks-remedial', 'StudentController@api_remarks_remedial');
+	Route::post('insert-core-values', 'StudentController@api_insert_values');
+	Route::get('data-qtr-record', 'StudentController@api_qtr_record');
+	
 });
 
 
@@ -72,13 +77,35 @@ Route::middleware('auth:admin')->group(function(){
 			return 'This is admin';
 		})->name('admin_dashboard');
 
-		Route::get('teachers', 'TeacherController@admin_show_all')->name('teacher_all');
-		Route::get('teachers/create', 'TeacherController@create')->name('teacher_create');
-		Route::get('teacher/{id}', 'TeacherController@single_teacher')->where('id', '[0-9]+')->name('single_teacher');
+		// Route::get('teachers', 'TeacherController@admin_show_all')->name('teacher_all');
+		
+		// Route::get('teacher/{id}', 'TeacherController@single_teacher')->where('id', '[0-9]+')->name('single_teacher');
 
 		Route::get('students/{id}', 'StudentController@show')->where('id', '[0-9]+')->name('single_student');
 
-		Route::post('teachers/create', 'TeacherController@store')->name('teacher_docreate');
+		Route::resource('students', 'StudentController')->only([
+		    'store', 'create', 'index'
+		])->names([
+		    'store' => 'student.addStudent',
+		]);
+
+		Route::resource('teachers', 'TeacherController')->only([
+		    'store', 'create', 'index', 'show', 'edit', 'update'
+		])->names(
+			[	
+				'index' => 'teacher_all',
+				'create' => 'teacher_create',
+				'show' => 'single_teacher',
+				'store' => 'teacher_docreate'
+			]
+		);
+
+		Route::resource('subjects', 'SubjectController')->only([
+		    'store', 'create', 'index'
+		]);
+
+		// Route::post('teachers/create', 'TeacherController@store')->name('teacher_docreate');
+		
 		Route::get('sections', 'AdminController@sections')->name('section_all');
 		Route::get('section/create', 'AdminController@section_create')->name('section_create');
 		Route::post('section/create', 'AdminController@section_docreate')->name('section_docreate');
@@ -100,6 +127,8 @@ Route::middleware('auth:admin')->group(function(){
 
 		Route::get('student/record/{id}', 'StudentController@grade_record')->where('id', '[0-9]+')->name('admin-student-record');
 
+		Route::get('student/record/{id}/print', 'StudentController@print_grade_records')->where('id', '[0-9]+')->name('admin-student-print-record');
+
 		Route::get('student/print-record/{id}', 'RecordsController@print_report_card')->where('id', '[0-9]+')->name('admin-student-printrecord');
 
 		Route::get('logout', 'AccountsController@account_logout')->name('logout');
@@ -107,20 +136,6 @@ Route::middleware('auth:admin')->group(function(){
 
 });
 
-
-Route::resource('students', 'StudentController')->only([
-    'store', 'create', 'index', 'show'
-])->names([
-    'store' => 'student.addStudent',
-]);
-
-Route::resource('teachers', 'TeacherController')->only([
-    'store', 'create', 'index', 'show'
-]);
-
-Route::resource('subjects', 'SubjectController')->only([
-    'store', 'create', 'index', 'show'
-]);
 
 Route::resource('records', 'RecordsController')->only([
     'store', 'create', 'index', 'show', 'edit', 'update'

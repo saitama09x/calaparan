@@ -431,48 +431,52 @@ class StudentController extends Controller{
 	function grade_enroll($student_id){
 
 		$student = Students::find($student_id);	
-		$gradeyr = Teachers::groupyr()->get();
+		// $gradeyr = Teachers::groupyr()->get();
+		$gradeyr = Grade_sections::select('gradelevel')->groupBy("gradelevel")->get();
 		$credentials = Credentials::all();
 		$school = Schools::all();
 
 		$adviser = [];
 
 		foreach($gradeyr as $yr){
-			$adviser[$yr->classgrade] = ['enroll_id' => '', 'yr_from' => '', 'yr_to' => '', 'data' => []];
-			$lists = Teachers::where('classgrade', '=', $yr->classgrade)->get();
-			if($lists->count()){
-				foreach($lists as $l){
-					$section = $l->section();
-					$secname = "No Section";
-					if($section->exists()){
-						$secname = $section->first()->sectionname;
-					}
+			$all_grades = Grade_sections::where('gradelevel', $yr->gradelevel)->get();
+			$adviser[$yr->gradelevel] = ['enroll_id' => '', 'yr_from' => '', 'yr_to' => '', 'data' => []];
+			if($all_grades->count()){
+				foreach($all_grades as $grade){
+					$lists = Teachers::where('section_id', $grade->id)->get();
+					if($lists->count()){					
+						$l = $lists->first();
+						$section = $l->section();
+						$secname = "No Section";
+						if($section->exists()){
+							$secname = $section->first()->sectionname;
+						}
 
-					$is_select = false;
-					$total_student = 0;
-					$enroll_id = null;
-					$enroll = $student->enrolls()->findteacher($l->id);
-					if($enroll->exists()){
-						$is_select = true;
-						$total_student = $enroll->count();
-					}
+						$is_select = false;
+						$total_student = 0;
+						$enroll_id = null;
+						$enroll = $student->enrolls()->findteacher($l->id);
+						if($enroll->exists()){
+							$is_select = true;
+							$total_student = $enroll->count();
+						}
 
-					if($is_select){
-						$adviser[$yr->classgrade]['yr_from'] = $enroll->first()->yr_from;
-						$adviser[$yr->classgrade]['yr_to'] = $enroll->first()->yr_to;
-						$adviser[$yr->classgrade]['enroll_id'] = $enroll->first()->id;
+						if($is_select){
+							$adviser[$yr->gradelevel]['yr_from'] = $enroll->first()->yr_from;
+							$adviser[$yr->gradelevel]['yr_to'] = $enroll->first()->yr_to;
+							$adviser[$yr->gradelevel]['enroll_id'] = $enroll->first()->id;
+						}
+						
+						$adviser[$yr->gradelevel]['data'][] = (object)[
+							'id' => $l->id,
+							'name' => $l->fullname,
+							'section' => $secname,
+							'total_student' => $total_student,
+							'is_selected' => $is_select
+						];
 					}
-					
-					$adviser[$yr->classgrade]['data'][] = (object)[
-						'id' => $l->id,
-						'name' => $l->fullname,
-						'section' => $secname,
-						'total_student' => $total_student,
-						'is_selected' => $is_select
-					];
 				}
 			}
-			
 		}
 
 		$obj = [
@@ -483,21 +487,38 @@ class StudentController extends Controller{
 			'school' => $school
 		];
 
-		
+		echo session('enroll_msg');
 		return view('students.grade_enroll', $obj);
 		
 	}
 
 	function grade_enroll_add(Request $r){
+		
+		$validatedData = $r->validate([
+	        'gradeyr' => 'required|integer',
+	        'teacher_id' => 'required|integer',
+	        'year_from' => 'required|date|date_format:Y-m-d',
+	        'year_to' => 'required|date|date_format:Y-m-d',
+	    ], [
+	    	'gradeyr.required' => 'Invalid Grade Yr Format',
+	    	'teacher_id.required' => 'Please select your Advisor',
+	    	'year_from.required' => 'Invalid Date'
+	    ]);
+
 		$gradeyr = $r->gradeyr;
 		$teacher_id = $r->teacher_id;
 		$id = $r->student_id;
+
 		$yr_from = date("Y-m-d", strtotime($r->year_from));
 		$yr_to = date("Y-m-d", strtotime($r->year_to));
+
+		$year_label = ["Kinder", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"];
 
 		$find_enroll = Student_enrolls::where('student_id', '=', $id)->where('gradeyr', '=', $gradeyr);
 
 		$eligible = Student_eligibles::where('student_id', $id)->get();
+
+		$teacher = Teachers::find($teacher_id);
 
 		if(!$find_enroll->exists()){
 			$new = new Student_enrolls;
@@ -532,11 +553,15 @@ class StudentController extends Controller{
 				}
 				else
 				{
+
+					$r->session()->flash('enroll_success', 'Successfully Enrolled to ' . $year_label[$gradeyr] . ' with ' . $teacher->fullname );
+
 					return redirect()->route('admin-student-enroll', ['id' => $id]);
 				}
 			}
 		}
 		else{
+
 			$update = $find_enroll->update([
 				"teacher_id" => $teacher_id,
 				"gradeyr" => $gradeyr,
@@ -550,6 +575,9 @@ class StudentController extends Controller{
 				}
 				else
 				{
+					
+					$r->session()->flash('enroll_success', 'Successfully Enrolled to ' . $year_label[$gradeyr] . ' with ' . $teacher->fullname );
+
 					return redirect()->route('admin-student-enroll', ['id' => $id]);
 				}
 			}
@@ -560,7 +588,6 @@ class StudentController extends Controller{
 	function print_form_137($student_id){
 
 		$student = Students::find($student_id);	
-		$gradeyr = Teachers::groupyr()->get();
 		$credentials = Credentials::all();
 		$school = Schools::all();
 		$enrolls = Student_enrolls::studentId($student_id)->get();
@@ -587,7 +614,6 @@ class StudentController extends Controller{
 
 		$obj = [
 			'student' => $student,
-			'gradeyr' => $gradeyr,
 			'credential' => $credentials,
 			'school' => $school,
 			'enrolls' => $enrolls,

@@ -9,10 +9,10 @@
   </div>
 <div class='card-body'>
 <div class='form-group'>
-<p>Fullname: {{$teacher->fullname}}</p>
+<p><h4><strong>Fullname:</strong> {{$teacher->fullname}}</h4> </p>
 </div>
 <div class='form-group'>
-<p>Section: {{$teacher->section->sectionname}}</p>
+<p><h4><strong>Section:</strong> {{$teacher->section->sectionname}}</h4></p>
 </div>
 <table class='table'>
 <thead><tr><th>Student</th><th>Action</th></tr></thead>

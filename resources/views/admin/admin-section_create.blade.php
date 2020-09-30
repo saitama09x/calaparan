@@ -2,6 +2,21 @@
 
 @section('content')
 
+@if($errors->any())
+    <div class="alert alert-danger" role='alert'>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+      </button>
+      @error('sectionname')
+      	<p>Required fill section name</p>
+      @enderror
+
+       @error('gradelevel')
+      	<p>Required fill Grade level</p>
+      @enderror
+    </div>
+@endif
+
 <div class='row'>
 <div class='col-md-6'>
 <div class="card card-primary">
@@ -16,13 +31,11 @@
 </div>
 <div class="form-group">
 <?php echo Form::label('gradelevel', 'Grade Level'); ?>
-<?php echo Form::select('gradelevel', [1, 2, 3, 4, 5, 6, 7], null, ['class'=>'form-control']) ?>
+<?php echo Form::select('gradelevel', [0 => 'Kinder', 1 => 'Grade 1', 
+						2 => 'Grade 2', 3 => 'Grade 3', 4 => 'Grade 4', 
+						5 => 'Grade 5', 6 => 'Grade 6'], 
+						null, ['class'=>'form-control']) ?>
 </div>
-<div class="form-group">
-<?php echo Form::label('teacher', 'Advisor'); ?>
-<?php echo Form::select('teacher', $teachers, null, ['class'=>'form-control']) ?>
-</div>
-
 <div class="form-group">
 <button class='btn btn-md btn-primary'>Submit</button>
 </div>

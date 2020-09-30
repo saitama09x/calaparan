@@ -98,46 +98,45 @@ class AdminController extends Controller{
 	}
 
 	function section_docreate(Request $r){
+
+		$validatedData = $r->validate([
+	        'sectionname' => 'required',
+	        'gradelevel' => 'required',
+	    ]);
+
 		$sectionname = $r->sectionname;
 		$gradelevel = $r->gradelevel;
-		$teacher = $r->teacher;
 
 		$new = new Grade_sections;
 		$new->sectionname = $sectionname;
 		$new->gradelevel = $gradelevel;
 		$new->date_created = time();
+		
 		if($new->save()){
-			$find = Teachers::find($teacher);
-			if($find->exists()){
-				$find->update(['section_id' => $new->id]);
-			}
+			return redirect()->route('section_all');
 		}
+
 		return redirect()->route('section_all');
 	}
 
 	function section_doedit(Request $r){
+		
+		$validatedData = $r->validate([
+	        'sectionname' => 'required',
+	        'gradelevel' => 'required',
+	    ]);
+
 		$id = $r->id;
 		$secname = $r->sectionname;
 		$gradelevel = $r->gradelevel;
-		$teacher = $r->teacher;
 
 		$find = Grade_sections::find($id);
+
 		if($find->exists()){
 			$find->update([
 				'sectionname' => $secname,
 				'gradelevel' => $gradelevel
 			]);
-
-			$find = Teachers::where('section_id', $id);
-			
-			if($find->exists()){
-				$find->update(['section_id' => 0]);
-			}
-
-			$find = Teachers::find($teacher);
-			if($find->exists()){
-				$find->update(['section_id' => $id]);
-			}
 		}
 
 		return redirect()->route('section_all');
@@ -196,5 +195,11 @@ class AdminController extends Controller{
 			return redirect()->route('subject_all');
 		}
 
+	}
+
+	function create_account($type){
+
+
+		
 	}
 }
