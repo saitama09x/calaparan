@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use App\Models\{Admin_accounts, Grade_sections, Teachers, Subjects};
+use App\Models\{Admin_accounts, Grade_sections, Teachers, Subjects, Guest_accounts};
 use App\Services\School_class;
 
 
@@ -197,9 +197,99 @@ class AdminController extends Controller{
 
 	}
 
-	function create_account($type){
+	function create_account($type = null, $id = null){
 
+		if($type == 'students'){
+			$students = Students::all();
+			$obj = [
+				'users' => $teachers
+			];
+			return view('admin.admin-account_student', $obj);
 
+		}
+
+		else if($type == 'teachers'){
+			$teachers = Teachers::all();
+
+			$obj = [
+				'users' => $teachers,
+			];
+
+			return view('admin.admin-account_teacher', $obj);
+
+		}
+	
+		$guess = Guest_accounts::where([
+				['account_type_label', '=', ucfirst($type)],
+				['account_id', '=', $id],
+			])->get();
+
+		if($id != null){
+			
+			$teacher = Teachers::find($id);
+
+			$obj = [
+				'user' => $teacher,
+				'guess' => $guess
+			];
+			return view('admin.admin-account_form', $obj);
+		}
+
+		return view('admin.admin-type_account');
 		
+	}
+
+	function docreate_account(Request $r, $type, $id){
+		$validatedData = $r->validate([
+	        'email' => 'required|e-mail',
+	        'password' => 'required|same:confirm|string|min:5',
+	        'confirm' => 'required|string|same:password'
+	    ],[
+	    	'email.required' => "Your email is required",
+	    	'password.same' => "Your password is not match",
+	    	'password.required' => "Your password is required",
+	    	'confirm.same' => "Confirm your password"
+	    ]);
+
+		$model = "";
+		if($type == 'teacher'){
+			$model = "App\Models\Teachers";
+		}
+		else if($type == 'student'){
+			$model = "App\Models\Students";	
+		}
+
+		$update = Guest_accounts::where([
+			['account_type_label', '=', ucfirst($type)],
+			['account_id', '=', $id],
+		]);
+
+		if($update->exists()){
+			$update->update([
+				'username' => $r->email,
+				'email' => $r->email,
+				'password' => Hash::make($r->password),
+				'account_type' => $model,
+				'account_type_label' => ucfirst($type),
+				'is_active' => 1,
+				'account_id' => $id,
+				'date_updated' => date("Y-m-d", time()),
+			]);
+		}else{
+			$new = new Guest_accounts;
+			$new->username = $r->email;
+			$new->email = $r->email;
+			$new->password = Hash::make($r->password);
+			$new->account_type = $model;
+			$new->account_type_label = ucfirst($type);
+			$new->is_active = 1;
+			$new->account_id = $id;
+			$new->date_created = date("Y-m-d", time());
+			$new->date_updated = date("Y-m-d", time());
+			$new->save();
+		}
+
+		return redirect()->route("admin-create-account", ['type' => $type, 'id' => $id])->with('success', "Successfully Updated");
+
 	}
 }

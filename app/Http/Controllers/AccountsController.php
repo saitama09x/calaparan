@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
-use App\Models\{Guest_accounts};
+use App\Models\{Guest_accounts, Teachers};
 
 class AccountsController extends Controller{
 
@@ -35,13 +35,26 @@ class AccountsController extends Controller{
 		$user = $r->username;
 		$pass = $r->password;
 		if(Auth::attempt(['username' => $user, 'password' => $pass])) {
-			return redirect()->intended('student_record');
+			if(Auth::guard('web')->check()){
+				if(Auth::user()->account_type_label == "Teacher"){
+					$auth = Auth::user();
+					$user = Teachers::where("id", $auth->account_id)->get();
+					if($user->count()){
+						$r->session()->forget('sidebarName');
+						$r->session()->put('sidebarName', $user->first()->fullname);
+					}
+				}
+			}
+			return redirect()->route('guest_dashboard');
 		}
 
 		return redirect()->intended('/');
 	}
 
-	function account_logout(){
+	function account_logout(Request $r){
+		
+		$r->session()->forget('sidebarName');
+
 		Auth::logout();
 		return redirect()->intended('/');
 	}

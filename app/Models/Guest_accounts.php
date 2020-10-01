@@ -25,4 +25,9 @@ class Guest_accounts extends Authenticatable{
         'date_created' => 'date',
         'date_updated' => 'date'
     ];
+
+    public function account()
+    {
+        return $this->morphTo();
+    }
 }

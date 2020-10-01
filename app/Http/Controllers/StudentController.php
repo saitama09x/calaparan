@@ -27,6 +27,19 @@ class StudentController extends Controller{
 		$this->partial = $partial;
 	}
 
+	function list_students(){
+
+		$id = Auth::user()->account_id;
+		$enrolls = Student_enrolls::where('teacher_id', $id)->get();
+
+		$obj = [
+			'enrolls' => $enrolls
+		];
+
+		return view('students.teacher-list_student', $obj);
+	}
+
+
 	function index(){
 
 		return view('students.listStudent');

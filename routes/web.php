@@ -54,8 +54,11 @@ Route::middleware('auth:web')->group(function(){
 	});
 
 	Route::prefix('teacher')->group(function() {
-		Route::get('list-students', 'StudentController@index')->name('lists_student');
+		
+		Route::get('list-students', 'StudentController@list_students')->name('lists_student');
+		
 		Route::get('grade-record/{id}', 'StudentController@grade_record')->where('id', '[0-9]+');
+		
 		Route::get('grade-enroll/{id}', 'StudentController@grade_enroll')->where('id', '[0-9]+')->name('grade-enroll');
 		Route::post('grade-enroll/add', 'StudentController@grade_enroll_add')->name('grade_enroll_add');
 		Route::post('grade-enroll/add-eligibility', 'StudentController@add_eligibities')->name('add_eligibities');
@@ -130,6 +133,10 @@ Route::middleware('auth:admin')->group(function(){
 		Route::get('student/record/{id}/print', 'StudentController@print_grade_records')->where('id', '[0-9]+')->name('admin-student-print-record');
 
 		Route::get('student/print-record/{id}', 'RecordsController@print_report_card')->where('id', '[0-9]+')->name('admin-student-printrecord');
+
+		Route::get('account/create/{type?}/{id?}', 'AdminController@create_account')->name("admin-create-account");
+
+		Route::put('account/create/{type}/{id}', 'AdminController@docreate_account')->name("admin-docreate-account");
 
 		Route::get('logout', 'AccountsController@account_logout')->name('logout');
 	});

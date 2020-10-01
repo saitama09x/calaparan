@@ -4,6 +4,7 @@
 @section('form-content')
 
 {!! Form::open(['route' => 'guest_do_login', 'method' => 'post']) !!}
+
 <div class="input-group mb-3">
   <input type="text" name="username" class="form-control" placeholder="Username">
   <div class="input-group-append">

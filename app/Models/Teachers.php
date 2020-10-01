@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\{Grade_sections, Student_enrolls};
+use App\Models\{Grade_sections, Student_enrolls, Guest_accounts};
 
 class Teachers extends Model
 {
@@ -28,12 +28,14 @@ class Teachers extends Model
     	return $this->hasMany(Grade_subjects::class, 'teacher_id', 'id');
     }
 
-    /*function scopeGroupyr($query){
-    	return $query->select('classgrade')->groupBy("classgrade");
-    }*/
 
     function enrolls(){
         return $this->hasMany(Student_enrolls::class, 'teacher_id', 'id');
+    }
+
+    function account()
+    {
+        return $this->morphMany(Guest_accounts::class, 'account');
     }
 
 }
