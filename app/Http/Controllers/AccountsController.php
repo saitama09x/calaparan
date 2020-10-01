@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use App\Models\{Guest_accounts, Teachers};
+use App\Services\UploadHandler;
 
 class AccountsController extends Controller{
 
@@ -40,8 +41,17 @@ class AccountsController extends Controller{
 					$auth = Auth::user();
 					$user = Teachers::where("id", $auth->account_id)->get();
 					if($user->count()){
+						
 						$r->session()->forget('sidebarName');
+						$r->session()->forget('profile_pic');
+
 						$r->session()->put('sidebarName', $user->first()->fullname);
+						if($user->first()->profile_pic != null){
+							$r->session()->put('profile_pic', env('APP_URL') . '/storage/app/images/' . $user->first()->profile_pic);
+						}else{
+							$r->session()->put('profile_pic', asset('assets/img/avatar.png'));
+						}
+						
 					}
 				}
 			}
@@ -54,6 +64,7 @@ class AccountsController extends Controller{
 	function account_logout(Request $r){
 		
 		$r->session()->forget('sidebarName');
+		$r->session()->forget('profile_pic');
 
 		Auth::logout();
 		return redirect()->intended('/');
@@ -88,6 +99,31 @@ class AccountsController extends Controller{
 
 	function register_done(){
 		return view('accounts.register_done');
+	}
+
+	function uploadProfilePic(Request $r){
+		$upload_dir = storage_path('app/images/');
+
+        $uploader = new UploadHandler(array(
+        'upload_dir' => $upload_dir,
+        'upload_url' => '/storage/app/images/',        
+        ));
+	}
+
+	function updateProfilePic(Request $r){
+		$auth = Auth::user();
+		$user = Teachers::where("id", $auth->account_id);
+		$pic = $r->picture;
+
+		if($user->exists()){
+			$update = $user->update([
+				'profile_pic' => $pic
+			]);
+
+			return response()->json(['status' => true]);
+		}
+		
+		return response()->json(['status' => false]);
 	}
 
 }

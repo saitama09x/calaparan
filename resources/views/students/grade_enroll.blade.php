@@ -21,6 +21,11 @@
 		{{$student->fname . ' ' . $student->mname . ' ' . $student->lname}} is added
 	@endcomponent
 @endif
+@if(session('is_updated'))
+	@component('alerts.alert', ['alert_type' => 'alert-success'])
+		Successfully Updated Infomation
+	@endcomponent
+@endif
 @if(session('enroll_success'))
 	@component('alerts.alert', ['alert_type' => 'alert-success'])
 		{{session('enroll_success')}}
@@ -34,6 +39,9 @@
 <h3 class="card-title">View Student Information</h3>
 </div>
 <div class="card-body">
+<div class='form-group'>
+<a href="{{route('student.editStudent', $student->id)}}" class='btn btn-md btn-success'>Edit Student Information</a>
+</div>
 <table class='table'>
 <tbody>
 <tr>
@@ -46,7 +54,7 @@
 <tr>
 <td><strong class='mr-2'>Birthday:</strong> <span>{{ $student->bday }}</span></td>
 <td><strong class='mr-2'>Gender:</strong><span> {{ $student->sex }}</span></td>
-<td><strong class='mr-2'>Date Created:</strong> <span>{{ $student->datecreated }}</span></td>
+<td colspan="2"><strong class='mr-2'>Date Created:</strong> <span>{{ $student->datecreated }}</span></td>
 </tr>
 
 <tr>
@@ -210,7 +218,9 @@
 <script src="{{ asset('assets/datepicker/js/bootstrap-datepicker.min.js') }}"></script>
 <script>
 $('.datepicker').datepicker({
-	format: 'yyyy-mm-dd'
+	format: 'yyyy',
+	viewMode: "years", 
+    minViewMode: "years"
 })
 </script>
 @endpush

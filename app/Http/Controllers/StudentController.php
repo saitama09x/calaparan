@@ -27,22 +27,55 @@ class StudentController extends Controller{
 		$this->partial = $partial;
 	}
 
-	function list_students(){
+	function list_students($year = null){
+
+		if($year != null){
+
+			$id = Auth::user()->account_id;
+
+			$enrolls = Student_enrolls::where([
+				[ 'teacher_id', '=', $id],
+				[ 'yr_from', '=', $year]
+			])->get();
+
+			$obj = [
+				'enrolls' => $enrolls,
+				'year_from' => $year,
+				'year_to' => $year + 1
+			];
+
+			return view('students.teacher-list_student', $obj);
+
+		}
 
 		$id = Auth::user()->account_id;
-		$enrolls = Student_enrolls::where('teacher_id', $id)->get();
+		$history = Student_enrolls::select("yr_from")->where('teacher_id', $id)->orderBy("yr_from", "DESC")->groupBy('yr_from')->get();
 
 		$obj = [
-			'enrolls' => $enrolls
+			'history' => $history
 		];
 
-		return view('students.teacher-list_student', $obj);
+		return view('students.teacher-list_year', $obj);
+		
 	}
 
 
 	function index(){
 
 		return view('students.listStudent');
+
+	}
+
+
+	function create(){
+
+		$student = Students::all();
+
+		$obj = [
+			'student' => $student
+		];
+
+		return view('students.createStudent', $obj);
 
 	}
 
@@ -80,15 +113,56 @@ class StudentController extends Controller{
 
 	}
 
-	function create(){
+	function edit($student_id){
 
-		$student = Students::all();
+		$student = Students::where('id', $student_id)->get();
 
-		$obj = [
-			'student' => $student
-		];
+		if($student->count()){
+			$obj = [
+				'student' => $student->first()
+			];
 
-		return view('students.createStudent', $obj);
+			return view('students.editStudent', $obj);
+		}
+		
+
+	}
+
+	function update(StudentValidator $r, $student_id){
+
+		$data = $r->validated();
+
+		$student = Students::find($student_id);
+
+		if($student->exists()){
+
+			$student->fname = $r->fname;
+			$student->lname = $r->lname;
+			$student->exname = $r->exname;
+			$student->mname = $r->mname;
+			$student->bday = strtotime($r->bday);
+			$student->sex = $r->sex;
+			$student->lrefno = $r->lrefno;
+			$student->mother = $r->moname;
+			$student->edu_one = $r->edu_one;
+			$student->occu_one = $r->occu_one;
+			$student->cont_one = $r->cont_one;
+			$student->father = $r->faname;
+			$student->edu_two = $r->edu_two;
+			$student->occu_two = $r->occu_two;
+			$student->cont_two = $r->cont_two;
+			$student->guardian = $r->guardian;
+			$student->edu_three = $r->edu_three;
+			$student->occu_three = $r->occu_three;
+			$student->cont_three = $r->cont_three;
+			$student->datecreated = time();
+			$student->dateupdated = time();
+
+			if($student->save()){
+				return redirect('/admin/enroll/student/' . $student_id)->with('is_updated', true);
+			}
+
+		}
 
 	}
 
@@ -510,8 +584,8 @@ class StudentController extends Controller{
 		$validatedData = $r->validate([
 	        'gradeyr' => 'required|integer',
 	        'teacher_id' => 'required|integer',
-	        'year_from' => 'required|date|date_format:Y-m-d',
-	        'year_to' => 'required|date|date_format:Y-m-d',
+	        'year_from' => 'required|date_format:Y',
+	        'year_to' => 'required|date_format:Y',
 	    ], [
 	    	'gradeyr.required' => 'Invalid Grade Yr Format',
 	    	'teacher_id.required' => 'Please select your Advisor',
@@ -522,8 +596,8 @@ class StudentController extends Controller{
 		$teacher_id = $r->teacher_id;
 		$id = $r->student_id;
 
-		$yr_from = date("Y-m-d", strtotime($r->year_from));
-		$yr_to = date("Y-m-d", strtotime($r->year_to));
+		$yr_from = $r->year_from;
+		$yr_to = $r->year_to;
 
 		$year_label = ["Kinder", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"];
 

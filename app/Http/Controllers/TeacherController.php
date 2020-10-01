@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
-use App\Models\{Teachers, Grade_sections};
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\{Teachers, Grade_sections, Guest_accounts};
+use App\Services\UploadHandler;
 
 class TeacherController extends Controller{
 
@@ -96,6 +98,54 @@ class TeacherController extends Controller{
 
 			return redirect()->route('teacher_all');
 		}
+	}
+
+	function account(){
+
+		$auth = Auth::user();
+		$user = Teachers::where("id", $auth->account_id)->get();
+
+		$obj = [
+			'teacher' => $user->first(),
+			'auth' => $auth
+		];
+
+		return view('teachers.accountTeacher', $obj);
+	}
+
+	function update_account(Request $r){
+		
+		$auth = Auth::user();
+
+		$validatedData = $r->validate([
+	        'username' => 'required',
+	        'email' => 'required|e-mail',
+	        'password' => 'required|same:confirm|string|min:5',
+	        'confirm' => 'required|string|same:password'
+	    ], [
+	    	'username.required' => "Your username is required",
+	    	'email.required' => "Your email is required",
+	    	'password.same' => "Your password is not match",
+	    	'password.required' => "Your password is required",
+	    	'confirm.same' => "Confirm your password"
+	    ]);
+
+	    $find = Guest_accounts::where([
+	    	['account_type_label', "=", "Teacher"],
+	    	['account_id', "=", $auth->account_id],
+	    ]);
+
+	    if($find->exists()){
+	    	$update = $find->update([
+	    		'username' => $r->username,
+	    		'email' => $r->email,
+	    		'password' => Hash::make($r->password)
+	    	]);
+
+	    	return redirect()->route('teacher-account')->with('account_updated', "Successfully Updated");
+	    }
+
+	    return redirect()->route('teacher-account')->with('account_error', "Not Updated, Please check.");
 	}
 
 }
