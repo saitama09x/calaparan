@@ -16,9 +16,12 @@
 <body class="hold-transition login-page">
 <div class="login-box">
   <div class="login-logo">
-    <a href="#"><b>Student Record</b></a>
+    <div class='mb-1'>
+      <img src="{{asset('assets/img/calaparan-logo.png')}}" width="50%"/>
+    </div>
+    <a href="#"><b>Calaparan Elementary School</b></a>
   </div>
-
+  @yield('form-error')
   <div class="card">
   	 <div class="card-body login-card-body">
       <p class="login-box-msg">@yield('account-title')</p>

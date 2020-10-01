@@ -21,10 +21,12 @@ class AdminController extends Controller{
 	function do_login(Request $r){
 		$user = $r->username;
 		$pass = $r->password;
+		
 		if(Auth::guard('admin')->attempt(['username' => $user, 'password' => $pass])){
 			return redirect('/admin/teachers');
 		}
-		return redirect('/admin');
+
+		return redirect('/admin')->with("login_error", "Incorrect Login");
 	}
 
 	function register(){

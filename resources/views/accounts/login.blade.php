@@ -1,5 +1,18 @@
 @extends('layouts.accountLayout')
 
+@section('form-error')
+
+@if(session('login_error'))
+<div class="alert alert-danger" role='alert'>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+      </button>
+      {{session('login_error')}}
+    </div>
+@endif
+
+
+@endsection
 
 @section('form-content')
 
@@ -23,7 +36,7 @@
 </div>
 <div class="row">
   <div class="col-8">
-    <a href="{{route('add_register')}}">Create Account</a>
+    <a href="{{route('student_register')}}">Create Account</a>
   </div>
   <!-- /.col -->
   <div class="col-4">

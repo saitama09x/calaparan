@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
-use App\Models\{Guest_accounts, Teachers};
+use App\Models\{Guest_accounts, Teachers, Students};
 use App\Services\UploadHandler;
 
 class AccountsController extends Controller{
@@ -54,11 +54,20 @@ class AccountsController extends Controller{
 						
 					}
 				}
+				else if(Auth::user()->account_type_label == "Student"){
+					$auth = Auth::user();
+					$user = Students::where("id", $auth->account_id)->get();
+					if($user->count()){
+						$row = $user->first();
+						$r->session()->put('sidebarName', $row->fname . " " . $row->lname);
+					}
+				}
 			}
+
 			return redirect()->route('guest_dashboard');
 		}
 
-		return redirect()->intended('/');
+		return redirect()->intended('/')->with("login_error", "Incorrect Login");
 	}
 
 	function account_logout(Request $r){
@@ -70,31 +79,91 @@ class AccountsController extends Controller{
 		return redirect()->intended('/');
 	}
 
-	function account_register_add(Request $r){
+	function student_check(Request $r){
 
-		$username = $r->username;
-		$password = $r->password;
-		$fname = $r->fname;
-		$mname = $r->mname;
-		$lname = $r->lname;
-		$email = $r->email;
-		$type = $r->account_type;
+		$validatedData = $r->validate([
+	        'lrefno' => 'required',
+	    ], [
+	    	'lrefno.required' => 'Please fill in your Learner Referrence Number'
+	    ]);
 
-		$new = new Guest_accounts;
-		$new->username = $r->username;
-		$new->password = Hash::make($r->password);
-		$new->fname = $r->fname;
-		$new->mname = $r->mname;
-		$new->lname = $r->lname;
-		$new->email = $email;
-		$new->account_type = $type;
-		$new->is_active = 0;
+		$find = Students::where("lrefno", $r->lrefno)->get();
 
-		$new->save();
+		if($find->count()){
+			
+			$guess = Guest_accounts::where([
+				['account_type_label', "=", "Student"],
+				['account_id', "=", $find->first()->id]
+			])->get();
 
-		if($new->id){
-			return redirect('/admin');
+			if(!$guess->count()){
+				return redirect()->route("student_password", $r->lrefno)->with('no_account', "You have no account yet, Please create your account");
+			}
+			else
+			{
+				return redirect()->route("student_register")->with('with_record', "You already registered");	
+			}
+			
 		}
+		else{
+			return redirect()->route("student_register")->with('no_record', "You record not found, please check in your school");	
+		}
+	}
+
+	function student_password($lrn){
+
+		$find = Students::where("lrefno", $lrn)->get();
+
+		if($find->count()){
+
+			$obj = [
+				'user' => $find->first(),
+				'lrn' => $lrn
+			];
+
+			return view('accounts.register-student_password', $obj);
+		}
+	}
+
+	function student_account_create(Request $r, $lrn){
+
+		$validatedData = $r->validate([
+	        'password' => 'required|same:confirm|string|min:5',
+	        'confirm' => 'required|string|same:password'
+	    ], [
+	    	'password.same' => "Your password is not match",
+	    	'password.required' => "Your password is required",
+	    	'confirm.same' => "Confirm your password"
+	    ]);
+
+
+		$find = Students::where("lrefno", $lrn)->get();
+
+		if($find->count()){
+
+			$guess = Guest_accounts::where([
+				['account_type_label', "=", "Student"],
+				['account_id', "=", $find->first()->id]
+			])->get();
+
+			if(!$guess->count()){
+				$new = new Guest_accounts;
+				$new->username = $lrn;
+				$new->password = Hash::make($r->password);
+				$new->account_type = "App\Models\Students";
+				$new->is_active = 1;
+				$new->account_id = $find->first()->id;
+				$new->account_type_label = "Student";
+				$new->date_created = date("Y-m-d", time());
+				$new->date_updated = date("Y-m-d", time());
+				$new->save();
+			}
+			else{
+				return redirect()->route("student_register")->with('with_record', "You already registered");
+			}
+		}
+
+		return redirect()->route("done_register");
 	}
 
 	function register_done(){

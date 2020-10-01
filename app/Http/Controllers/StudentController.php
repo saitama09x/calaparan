@@ -12,7 +12,7 @@ use App\Models\{
 	Grade_sections, Credentials, Schools, 
 	Student_eligibles, Student_records, 
 	Student_remedials, Student_values, Student_values_recs,
-	Subjects
+	Subjects, Other_eligibles
 };
 use App\Services\Partial_object;
 use App\Http\Requests\StudentValidator;
@@ -515,12 +515,50 @@ class StudentController extends Controller{
 		}
 	}
 
+	function add_other_eligibities(Request $r){
+
+		$find = Other_eligibles::where('student_id', $r->student_id);
+
+		$student_id = $r->student_id;
+		$pept = $r->pept;
+		$date_exam = $r->date_exam;
+		$others = $r->others;
+		$test_center = $r->test_center;
+		$remarks = $r->remarks;
+
+		if($find->exists()){
+			$update = $find->update([
+				'pept' => $pept,
+				'date_exam' => $date_exam,
+				'others' => $others,
+				'test_center' => $test_center,
+				'remarks' => $remarks,
+			]);
+		}
+		else
+		{
+			$new = new Other_eligibles;
+			$new->student_id = $student_id;
+			$new->pept = $pept;
+			$new->date_exam = $date_exam;
+			$new->others = $others;
+			$new->test_center = $test_center;
+			$new->remarks = $remarks;
+			$new->date_created = date("Y-m-d", time());
+			$new->save();
+		}
+		
+		return redirect()->route('admin-student-enroll', ['id' => $student_id]);
+
+	}
+
 	function grade_enroll($student_id){
 
 		$student = Students::find($student_id);	
 		// $gradeyr = Teachers::groupyr()->get();
 		$gradeyr = Grade_sections::select('gradelevel')->groupBy("gradelevel")->get();
 		$credentials = Credentials::all();
+		$others_eligible = Other_eligibles::where('student_id', $student_id)->get();
 		$school = Schools::all();
 
 		$adviser = [];
@@ -571,10 +609,10 @@ class StudentController extends Controller{
 			'gradeyr' => $gradeyr,
 			'adviser' => $adviser,
 			'credential' => $credentials,
-			'school' => $school
+			'school' => $school,
+			'others_eligible' => $others_eligible
 		];
 
-		echo session('enroll_msg');
 		return view('students.grade_enroll', $obj);
 		
 	}

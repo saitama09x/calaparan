@@ -70,10 +70,30 @@
 		.text-center{
 			text-align:center;
 		}
+		#footer{
+			padding: 20px;
+		    background-color: gray;
+		    text-align: center;
+		    margin-top: 20px;
+		}
+
+		#footer button{
+			padding: 10px 20px;
+		    background-color: #4040f7;
+		    border: unset;
+		    color: white;
+		}
+
+		@media print{
+			#footer{
+				display:none;
+			}
+		}
 	</style>
 </head>
 <body>
 <div id='wrapper'>
+	<center><img src="{{asset('assets/img/header-print.jpg')}}" width="50%"/></center>
 <table>
 <thead class="title-header"><tr><th colspan="8"><center>View Student Information</center></th></tr></thead>
 <tbody class="details py-7">
@@ -254,6 +274,8 @@ if(isset($remedials[$e->id])){
 
 </div>
 
-
+<div id="footer">
+	<button type='button' onclick="window.print()">Print</button>
+</div>
 </body>
 </html>

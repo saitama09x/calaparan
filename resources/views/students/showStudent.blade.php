@@ -40,7 +40,12 @@
 
 @section('content')
 <div class='form-group'>
+@if(Auth::guard('web')->check())
+<a href="{{route('teacher-student-print-record', $enrolls->id)}}" target="_blank" class='btn btn-md btn-primary'>Print Record</a>
+@endif 
+@if(Auth::guard('admin')->check())
 <a href="{{route('admin-student-print-record', $enrolls->id)}}" target="_blank" class='btn btn-md btn-primary'>Print Record</a>
+@endif
 </div>
 <div class='row'>
 <div class='col-md-12'>

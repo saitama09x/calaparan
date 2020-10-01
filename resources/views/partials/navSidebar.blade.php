@@ -1,19 +1,26 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="index3.html" class="brand-link">
-      <img src="{{ asset('assets/img/AdminLTELogo.png') }}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+      <img src="{{ asset('assets/img/calaparan-logo.png') }}" alt="Calaparan" class="brand-image img-circle elevation-3"
            style="opacity: .8">
       <span class="brand-text font-weight-light">Calaparan</span>
     </a>
     <div class="sidebar">
     	 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
     	 	@if(session('sidebarName'))
-	        <div class="image">
-	          <img src="{{ session('profile_pic') }}" class="img-circle elevation-2" alt="User Image">
-	        </div>
+		        @if(session('profile_pic'))
+		        <div class="image">
+		          <img src="{{ session('profile_pic') }}" class="img-circle elevation-2" alt="User Image">
+		        </div>
+		        @endif
 	        <div class="info">
 	          <a href="#" class="d-block">{{session('sidebarName')}}</a>
 	        </div>
+
+	        @else
+	        	<div class="info">
+	         		<a href="#" class="d-block">Administrator</a>
+	       		</div>
 	        @endif
 	      </div>
 	       <nav class="mt-2">

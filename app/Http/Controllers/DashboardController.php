@@ -30,7 +30,9 @@ class DashboardController extends Controller{
 
 	function dashboard_student_records(){
 
-		$student = Students::find(1);
+		$auth = Auth::user();
+
+		$student = Students::where("id", $auth->account_id)->get();
 
 		$obj = [
 			'student' => [],
@@ -41,8 +43,8 @@ class DashboardController extends Controller{
 		$teacher_name = "";
 		$section_name = "";
 		if($student->count()){
-			$obj['student'] = $student;
-			$enroll = $student->many_enroll();
+			$obj['student'] = $student->first();
+			$enroll = $student->first()->many_enroll();
 			if($enroll->exists()){
 				$res = $enroll->get();
 				foreach($res as $r){
@@ -89,10 +91,7 @@ class DashboardController extends Controller{
 						$subname = "";
 						$remarks = "";
 						if($sub->exists()){
-							$rem = Student_remarks::subjectRem($e->id, $sub->first()->subjcode);
-							if($rem->exists()){
-								$remarks = $rem->first()->remarks;
-							}
+					
 							$subname = $sub->first()->subjname;
 						}
 						$obj['records'][] = (object) [ 'id' => $r->enroll_id, 
@@ -102,7 +101,7 @@ class DashboardController extends Controller{
 							'qtr_third' => $r->qtr_third, 
 							'qtr_fourth' => $r->qtr_fourth, 
 							'final_rate' => $r->final_rate,
-							'remarks' => $remarks
+							'remarks' => $r->remarks
 						];
 					}
 				}

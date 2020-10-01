@@ -1,5 +1,20 @@
 @extends('layouts.accountLayout')
 
+
+@section('form-error')
+
+@if(session('login_error'))
+<div class="alert alert-danger" role='alert'>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">×</span>
+      </button>
+      {{session('login_error')}}
+    </div>
+@endif
+
+
+@endsection
+
 @section('account-title', 'Admin Login')
 
 @section('form-content')

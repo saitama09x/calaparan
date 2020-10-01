@@ -16,8 +16,12 @@ Route::post('/dologin', 'AccountsController@account_login')->name('guest_do_logi
 
 Route::prefix('account')->group(function() {
 
-	Route::get('register', 'AccountsController@register')->name("guest_register");
-	Route::post('register', 'AccountsController@account_register_add')->name('add_register');
+	Route::get('student-register', 'AccountsController@register')->name("student_register");
+	Route::post('student-check', 'AccountsController@student_check')->name('student_check');
+	Route::get('student-password/{lrn}', 'AccountsController@student_password')->name('student_password');
+	
+	Route::put('student-account-create/{lrn}', 'AccountsController@student_account_create')->name('student_account_create');
+
 	Route::get('register/done', 'AccountsController@register_done')->name('done_register');
 	Route::get('logout', 'AccountsController@account_logout')->name('guest_logout');
 
@@ -59,6 +63,8 @@ Route::middleware('auth:web')->group(function(){
 		Route::get('list-students/{year?}', 'StudentController@list_students')->name('lists_student');
 		
 		Route::get('student/record/{id}', 'StudentController@grade_record')->where('id', '[0-9]+')->name('teacher-student-record');
+
+		Route::get('student/record/{id}/print', 'StudentController@print_grade_records')->where('id', '[0-9]+')->name('teacher-student-print-record');
 
 		Route::get('account', 'TeacherController@account')->where('id', '[0-9]+')->name('teacher-account');
 
@@ -132,6 +138,8 @@ Route::middleware('auth:admin')->group(function(){
 		Route::post('grade-enroll/add', 'StudentController@grade_enroll_add')->name('admin-grade_enroll_add');
 
 		Route::post('grade-enroll/add-eligibility', 'StudentController@add_eligibities')->name('admin-add_eligibities');
+
+		Route::post('grade-enroll/add-other-eligibility', 'StudentController@add_other_eligibities')->name('admin-add_other_eligibities');
 
 		Route::get('student/record/{id}', 'StudentController@grade_record')->where('id', '[0-9]+')->name('admin-student-record');
 

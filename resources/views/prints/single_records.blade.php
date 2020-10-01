@@ -96,6 +96,24 @@
 		.mb{
 			margin-bottom:20px;
 		}
+		#footer{
+			padding: 20px;
+		    background-color: gray;
+		    text-align: center;
+		    margin-top: 20px;
+		}
+		#footer button{
+			padding: 10px 20px;
+		    background-color: #4040f7;
+		    border: unset;
+		    color: white;
+		}
+
+		@media print{
+			#footer{
+				display:none;
+			}
+		}
 	</style>
 </head>
 <body>
@@ -215,6 +233,8 @@ $rowspan = count($core_arr[$k]['val']);
 </table>
 </div>
 </div>
-
+<div id="footer">
+	<button type='button' onclick="window.print()">Print</button>
+</div>
 </body>
 </html>

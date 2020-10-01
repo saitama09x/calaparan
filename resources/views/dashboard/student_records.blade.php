@@ -3,7 +3,7 @@
 @section('content')
 
 <div class='row'>
-<div class='col-md-9'>
+<div class='col-md-12'>
 <div class="card card-primary">
 	<div class="card-header">
     <h3 class="card-title">Student Name Records</h3>
@@ -23,6 +23,29 @@
       <td>{{ $student->sex }}</td>
       <th>Date Created:</th>
       <td>{{ $student->datecreated }}</td></tr>
+      
+<tr>
+<td><strong class='mr-2'>Mother:</strong> <span>{{ $student->mother }}</span></td>
+<td><strong class='mr-2'>Highest Educational Attainment::</strong><span> {{ $student->edu_one }}</span></td>
+<td><strong class='mr-2'>Occupation:</strong> <span>{{ $student->occu_one }}</span></td>
+<td><strong class='mr-2'>Contact Number:</strong> <span>{{ $student->cont_one }}</span></td>
+</tr>
+
+
+<tr>
+<td><strong class='mr-2'>Father:</strong> <span>{{ $student->father }}</span></td>
+<td><strong class='mr-2'>Highest Educational Attainment::</strong><span> {{ $student->edu_two }}</span></td>
+<td><strong class='mr-2'>Occupation:</strong> <span>{{ $student->occu_two }}</span></td>
+<td><strong class='mr-2'>Contact Number:</strong> <span>{{ $student->cont_two }}</span></td>
+</tr>
+
+<tr>
+<td><strong class='mr-2'>Guardian:</strong> <span>{{ $student->guardian }}</span></td>
+<td><strong class='mr-2'>Highest Educational Attainment::</strong><span> {{ $student->edu_three }}</span></td>
+<td><strong class='mr-2'>Occupation:</strong> <span>{{ $student->occu_three }}</span></td>
+<td><strong class='mr-2'>Contact Number:</strong> <span>{{ $student->cont_three }}</span></td>
+</tr>
+
     </tbody>
     </table>
   </div>
@@ -34,7 +57,7 @@
 <div class='row'>
 @if(count($enrolls))
   @foreach($enrolls as $e)
-  <div class='col-md-5'>
+  <div class='col-md-6'>
   <div class="card card-primary">
   <div class="card-header">
     <h3 class="card-title">School Record</h3>

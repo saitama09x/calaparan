@@ -157,6 +157,65 @@
 </div>
 {!! Form::close() !!}
 
+{!! Form::model($others_eligible, ['route' => ['admin-add_other_eligibities'], 'method' => 'post']) !!}
+<?= Form::hidden('student_id', $student->id) ?>
+<div class='row'>
+<div class='col-md-12'>
+<div class="card card-primary">
+<div class="card-header">
+<h3 class="card-title">Other Credential Presented</h3>
+</div>
+<div class="card-body">
+	<div class='row'>
+		<div class='col-md'>
+			<?php 
+				$pept = "";
+				$date_exam = "";
+				$others = "";
+				$test_center = "";
+				$remarks = "";
+
+				if($others_eligible->count()){
+					$row = $others_eligible->first();
+					$pept = $row->pept;
+					$date_exam = $row->date_exam;
+					$others = $row->others;
+					$test_center = $row->test_center;
+					$remarks = $row->remarks;
+				}
+			?>
+			<?php echo Form::label('pept', 'Pept Passer Rating'); ?>
+			<?php echo Form::text('pept', $pept, ['class' => 'form-control', 'placeholder' => 'Rating']); ?>
+		</div>
+		<div class='col-md'>
+			<?php echo Form::label('date_exam', 'Date Exam'); ?>
+			<?php echo Form::text('date_exam', $date_exam, ['class' => 'form-control', 'placeholder' => 'Date Exam']); ?>
+		</div>
+		<div class='col-md'>
+			<?php echo Form::label('others', 'Others (Pls. specify)'); ?>
+			<?php echo Form::text('others', $others, ['class' => 'form-control', 'placeholder' => 'Others']); ?>
+		</div>
+	</div>
+	<div class='row'>
+		<div class='col-md'>
+			<?php echo Form::label('test_center', 'Name and Address of testing Center'); ?>
+			<?php echo Form::text('test_center', $test_center, ['class' => 'form-control', 'placeholder' => 'testing Center']); ?>
+		</div>
+		<div class='col-md'>
+			<?php echo Form::label('remarks', 'Remarks'); ?>
+			<?php echo Form::text('remarks', $remarks, ['class' => 'form-control', 'placeholder' => 'Remarks']); ?>
+		</div>
+	</div>
+
+	<button class='btn btn-md btn-primary mt-2'>Update</button>
+</div>
+
+</div>
+</div>
+</div>
+
+{!! Form::close() !!}
+
 <div class='row'>
 @foreach($gradeyr as $index => $yr)
 @php
@@ -221,6 +280,10 @@ $('.datepicker').datepicker({
 	format: 'yyyy',
 	viewMode: "years", 
     minViewMode: "years"
+})
+
+$('#date_exam').datepicker({
+	format: 'yyyy-mm-dd',
 })
 </script>
 @endpush
