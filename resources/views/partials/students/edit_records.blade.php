@@ -29,14 +29,27 @@
 	<div class='form-group'>
 		<table class='table'>
 			<tbody>
-			@if(!empty($enrolls))
-				@if($enrolls->records->count())
-					@foreach($enrolls->records as $s)
-						<tr><td>{{$s->subject->subjname}}</td>
-							<td><input type='number' name='gradeval[]' data-id="{{$s->subject->subjcode}}" value="{{$s->qtr_first}}" class='form-control'/></td></tr>
-					@endforeach
-				@endif
+			@if(count($grades))
+				@foreach($grades as $g)
+					@if(!count($g['children']))
+						<tr>
+							<td>{{$g['subject']}}</td>
+							<td><input type='number' name='gradeval[]' data-id="{{$g['subcode']}}" value="{{$g['first']}}" class='form-control'/></td>
+						</tr>
+					@else
+						<tr>
+						<td colspan="7"><strong>{{$g['subject']}}</strong></td>
+						</tr>
+						@foreach($g['children'] as $c)
+						<tr>
+							<td>{{$c['subject']}}</td>
+							<td><input type='number' name='gradeval[]' data-id="{{$c['subcode']}}" value="{{$c['first']}}" class='form-control'/></td>
+						</tr>
+						@endforeach
+					@endif
+				@endforeach
 			@endif
+
 			</tbody>
 		</table>
 	</div>

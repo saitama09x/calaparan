@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Student Record System</title>
+  <title>Calaparan Online Information</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{{ asset('assets/fontawesome-free/css/all.min.css') }}">
@@ -19,7 +19,7 @@
     <div class='mb-1'>
       <img src="{{asset('assets/img/calaparan-logo.png')}}" width="50%"/>
     </div>
-    <a href="#"><b>Calaparan Elementary School</b></a>
+    <a href="#"><b>Online Information</b></a>
   </div>
   @yield('form-error')
   <div class="card">

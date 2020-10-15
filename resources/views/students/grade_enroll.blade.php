@@ -26,9 +26,25 @@
 		Successfully Updated Infomation
 	@endcomponent
 @endif
+@if(session('is_updated_status'))
+	@if(session('is_updated_status')==true)
+		@component('alerts.alert', ['alert_type' => 'alert-success'])
+			Successfully Updated Status
+		@endcomponent
+	@else
+		@component('alerts.alert', ['alert_type' => 'alert-danger'])
+			Incorrect Data
+		@endcomponent
+	@endif
+@endif
 @if(session('enroll_success'))
 	@component('alerts.alert', ['alert_type' => 'alert-success'])
 		{{session('enroll_success')}}
+	@endcomponent
+@endif
+@if(session('enroll_error'))
+	@component('alerts.alert', ['alert_type' => 'alert-danger'])
+		{{session('enroll_error')}}
 	@endcomponent
 @endif
 <div class='form-group'>
@@ -36,11 +52,33 @@
 </div>
 <div class="card card-primary">
 <div class="card-header">
+<div class='row justify-content-between align-items-center'>
 <h3 class="card-title">View Student Information</h3>
+<button type='button' class='btn btn-sm btn-warning'  data-toggle="modal" data-target="#update-status-modal" >Update Current Status</button>
+</div>
 </div>
 <div class="card-body">
+<div class='row justify-content-between'>
 <div class='form-group'>
 <a href="{{route('student.editStudent', $student->id)}}" class='btn btn-md btn-success'>Edit Student Information</a>
+</div>
+<div class='p-2'>
+<span class='mr-2'>Current Status:</span>
+@if($status_enroll->count())
+	@if($status_enroll->first()->enroll_type == "ENROLLED")
+		<strong class='text-success'>Enrolled</strong>
+	@elseif($status_enroll->first()->enroll_type == "REENROLLED")		
+		<strong class='text-warning'>Re-Enrolled</strong>
+	@elseif($status_enroll->first()->enroll_type == "DROPPEDOUT")		
+		<strong class='text-danger'>Dropped Out</strong>
+	@elseif($status_enroll->first()->enroll_type == "TRANSFERREDOUT")		
+		<strong class='text-danger'>Transferred Out</strong>
+	@elseif($status_enroll->first()->enroll_type == "UNENROLLED")		
+		<strong class='text-danger'>Un-Enrolled</strong>
+	@endif
+	<a href="#card-panel-{{$status_enroll->first()->gradeyr}}" style="font-size:20px;"><i class="fas fa-arrow-circle-down"></i></a>
+@endif
+</div>
 </div>
 <table class='table'>
 <tbody>
@@ -222,24 +260,44 @@
 	$year_label = ["Kinder", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"];
 @endphp
 <div class='col-md-12'>
-<div class="card card-primary">
+<div class="card card-primary" id="card-panel-{{$yr->gradelevel}}">
 <div class="card-header">
+<div class='row justify-content-between align-items-center'>
+<div>
 <h3 class="card-title">Enrollment Year  - <strong>{{$year_label[$yr->gradelevel]}}</strong></h3>
 </div>
+<div>
+<a href="{{route('admin-student-record', $adviser[$yr->gradelevel]['enroll_id'])}}" class='btn btn-md btn-success'>See Records</a>
+<a href="#"  data-toggle="modal" data-target="#re-enroll_modal-{{$yr->gradelevel}}" class='btn btn-md btn-danger'>Re-enroll</a>
+</div>
+</div>
+</div>
 <div class="card-body">
-{!! Form::model($student, ['route' => ['admin-grade_enroll_add'], 'method' => 'post']) !!}
+{!! Form::model($student, ['route' => ['admin-grade_enroll_add', $adviser[$yr->gradelevel]['route']], 'method' => 'put']) !!}
 <?= Form::hidden('gradeyr', $yr->gradelevel) ?>
 <?= Form::hidden('student_id', $student->id) ?>
 <div class='form-group'>
 <div class='row'>
-<div class='col-md d-flex'>
+<div class='col-md-5 d-flex'>
 <label class="mr-2"><strong>Year From:</strong> <input type='text' class='form-control datepicker' value="{{$adviser[$yr->gradelevel]['yr_from']}}" name='year_from' autocomplete='off'/></label>
 <label>
 <strong>Year To:</strong> <input type='text' class='form-control datepicker' value="{{$adviser[$yr->gradelevel]['yr_to']}}" name='year_to' autocomplete='off'/></label>
 </div>
-<div class='col-md d-flex align-items-center'>
-<a href="{{route('admin-student-record', $adviser[$yr->gradelevel]['enroll_id'])}}" class='btn btn-md btn-info'>Records</a>
-</div>
+<div>
+<label class="mr-4"><strong>Status:</strong>
+@if($adviser[$yr->gradelevel]['type'] == "ENROLLED")
+<p class='text-success mb-0'>Enrolled</p>
+@elseif($adviser[$yr->gradelevel]['type'] == "DROPPEDOUT")
+<p class='text-danger mb-0'>Dropped Out</p>
+@elseif($adviser[$yr->gradelevel]['type'] == "TRANSFERREDOUT")
+<p class='text-danger mb-0'>Transferred Out</p>
+@elseif($adviser[$yr->gradelevel]['type'] == "UNENROLLED")
+<p class='text-danger mb-0'>Un-Enrolled</p>
+@elseif($adviser[$yr->gradelevel]['type'] == "REENROLLED")
+<p class='text-warning mb-0'>Re-Enrolled</p>
+<a href="{{route('admin-student-enroll_history', ['id' => $student->id, 'level' => $yr->gradelevel])}}" class='btn btn-sm btn-primary'>Check Last Year</a>
+@endif
+</label>
 </div>
 </div>
 <table class='table'>
@@ -258,14 +316,23 @@
 	</tbody>
 </table>
 <div class='form-group'>
-<input type='submit' class='btn btn-md btn-primary' value="update" />
+@if($adviser[$yr->gradelevel]['type'] == "")
+<input type='submit' class='btn btn-md btn-primary' value="Enroll" />
+@else
+<input type='submit' class='btn btn-md btn-primary' value="Update" />
+@endif
 </div>
 {!! Form::close() !!}
 </div>
 </div>
 </div>
-  	@endforeach
+
+@include('partials.students.re-enroll', ['adviser' => $adviser[$yr->gradelevel], 'modal_id' => 're-enroll_modal-' . $yr->gradelevel, 'gradelevel' => $yr->gradelevel, 'student_id' => $student->id])
+
+@endforeach
 </div>	
+
+@include('partials.students.update_status', ['modal_id' => 'update-status-modal', 'status_enroll' => $status_enroll->first()])
 
 @endsection
 

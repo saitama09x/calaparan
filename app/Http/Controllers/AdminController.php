@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use App\Models\{Admin_accounts, Grade_sections, Teachers, Subjects, Guest_accounts};
+use App\Models\{Admin_accounts, Grade_sections, Teachers, Subjects, Guest_accounts, Student_enrolls};
 use App\Services\School_class;
 
 
@@ -142,6 +142,27 @@ class AdminController extends Controller{
 		}
 
 		return redirect()->route('section_all');
+	}
+
+	function list_students($section){
+
+		$teacher = Teachers::where('section_id', $section)->get();
+		$obj = [
+			'selyears' => null,
+			'section' => $section,
+			'current_yr' => date("Y", time())
+		];
+
+		if($teacher->count()){
+			$teacher = $teacher->first();
+			$selyears = Student_enrolls::select("yr_from")->where('teacher_id', $teacher->id)->groupBy("yr_from")->get();
+			if($selyears->count()){
+				$obj['selyears'] = $selyears;
+			}
+		}
+
+		return view('admin.admin-list_students', $obj);
+
 	}
 
 	function subjects(){

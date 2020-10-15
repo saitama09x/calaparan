@@ -33,9 +33,8 @@ class RecordsController extends Controller{
 	function api_insert_records(Request $r){
 		$grade = $r->gradeval;
 		$quarter = $r->quarter;
-		$sid = $r->sid;
-		$yr = $r->grade_yr;
-		$enroll = Student_enrolls::enrollId($sid, $yr)->get();
+		$enroll_id = $r->enroll_id;
+		$enroll = Student_enrolls::where("id", $enroll_id)->get();
 
 		if($enroll->count()){
 			$first = $enroll->first();
@@ -56,13 +55,17 @@ class RecordsController extends Controller{
 				$json = json_decode($g);
 				$records = Student_records::where('enroll_id', $first->id)->where('subjcode', $json->code);
 				if(!$records->exists()){
-					$data = ['enroll_id' => $first->id, 'subjcode' => $json->code, $qtr_col => $json->value, 'datecreated' => date("Y-m-d", time())];
+					if(!empty($json->value)){
+						$data = ['enroll_id' => $first->id, 'subjcode' => $json->code, $qtr_col => $json->value, 'datecreated' => date("Y-m-d", time())];
 						Student_records::insert($data);
+					}
 				}
 				else{
-					$records->update([
-						$qtr_col => $json->value
-					]);
+					if(!empty($json->value)){
+						$records->update([
+							$qtr_col => $json->value
+						]);
+					}
 				}
 			}
 		}

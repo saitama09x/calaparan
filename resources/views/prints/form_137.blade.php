@@ -221,11 +221,11 @@
 		@foreach($e->records as $r)
 			<tr>
 				<td>{{$r->subject->subjname}}</td>
-				<td>{{$r->qtr_first}}</td>
-				<td>{{$r->qtr_second}}</td>
-				<td>{{$r->qtr_third}}</td>
-				<td>{{$r->qtr_fourth}}</td>
-				<td>{{$r->final_rate}}</td>
+				<td>{{( $r->qtr_first != 0) ? $r->qtr_first : ""}}</td>
+				<td>{{( $r->qtr_second != 0) ? $r->qtr_second : ""}}</td>
+				<td>{{( $r->qtr_third != 0) ? $r->qtr_third : ""}}</td>
+				<td>{{( $r->qtr_fourth != 0) ? $r->qtr_fourth : ""}}</td>
+				<td>{{( $r->final_rate != 0) ? $r->final_rate : ""}}</td>
 				<td>{!! $r->remarks !!}</td>
 			</tr>
 		@endforeach

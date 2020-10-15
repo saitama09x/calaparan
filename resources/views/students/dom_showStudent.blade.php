@@ -21,15 +21,7 @@
 @else
 
 <tr>
-<td>{{$g['subject']}}</td>
-<td>{{$g['first']}}</td>
-<td>{{$g['second']}}</td>
-<td>{{$g['third']}}</td>
-<td>{{$g['fourth']}}</td>
-<td>{{$g['final']}}</td>
-<td>{!! $g['remarks'] !!}
-<a href="javascript:void(0)" class='btn btn-sm btn-info btn-add-remarks' data-subjcode="{{$g['subcode']}}" data-eid="{{$g['enroll_id']}}" data-toggle="modal" data-target="#remarks_modal">Edit Remarks</a>
-</td>
+<td colspan="7"><strong>{{$g['subject']}}</strong></td>
 </tr>
 
 @foreach($g['children'] as $c)

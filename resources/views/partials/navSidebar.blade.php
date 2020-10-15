@@ -109,6 +109,12 @@
 		                  <p>Add</p>
 		                </a>
 		              </li>
+		               <li class="nav-item">
+		                <a href="{{route('enroll_students')}}" class="nav-link">
+		                  <i class="far fa-circle nav-icon"></i>
+		                  <p>View All</p>
+		                </a>
+		              </li>
 		         </ul>
 	          </li>
 	           <li class="nav-item has-treeview">
@@ -124,14 +130,6 @@
 	              <i class="nav-icon fas fa-tachometer-alt"></i>
 	              <p>
 	                Subjects
-	              </p>
-	            </a>
-	           </li>
-	           <li class="nav-item has-treeview">
-	            <a href="{{route('enroll_students')}}" class="nav-link">
-	              <i class="nav-icon fas fa-tachometer-alt"></i>
-	              <p>
-	                Enrolls
 	              </p>
 	            </a>
 	           </li>

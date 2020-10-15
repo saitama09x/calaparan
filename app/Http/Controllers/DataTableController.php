@@ -73,6 +73,59 @@ class DataTableController extends Controller{
 		return response()->json($dt);
 	}
 
+	function sectionStudenList(Request $r){
+
+		$section = $r->section;
+		$school_yr = $r->school_yr;
+
+		$teacher = Teachers::where('section_id', $section)->get();
+		
+		$dt = ['draw' => 0, 'recordsTotal' => 0, 'recordsFiltered' => 0, 'data' => []];
+		$data = [];	
+
+		if($teacher->count()){
+			$teacher = $teacher->first();
+			$enrolls = Student_enrolls::where([
+				['teacher_id', '=', $teacher->id],
+				['yr_from', '=', $school_yr],
+			])->orderBy("yr_from", "asc")->get();
+			
+			if($enrolls->count()){
+				foreach($enrolls as $e){
+					$status_str = "";
+					if($e->enroll_type == "ENROLLED"){
+						$status_str = "<strong class='text-success'>Enrolled</strong>";
+					}
+					elseif($e->enroll_type == "REENROLLED"){
+						$status_str = "<strong class='text-primary'>Re-Enrolled</strong>";
+					}
+					elseif($e->enroll_type == "DROPPEDOUT"){
+						$status_str = "<strong class='text-danger'>Dropped Out</strong>";
+					}
+					elseif($e->enroll_type == "TRANSFERREDOUT"){
+						$status_str = "<strong class='text-danger'>Transferred Out</strong>";
+					}
+					elseif($e->enroll_type == "UNENROLLED"){
+						$status_str = "<strong class='text-danger'>Un-Enrolled</strong>";
+					}
+
+					$data[] = [
+						'student_name' => sprintf("%s, %s %s", $e->student->lname, $e->student->fname, $e->student->mname),
+						'status' => $status_str,
+						'enroll_route' => route('admin-student-enroll', $e->student_id)
+					];
+				}
+
+				$dt['recordsTotal'] = count($data);
+				$splice = array_splice($data, 0, 10);
+				$dt['recordsFiltered'] = count($splice);
+				$dt['data'] = $splice;
+
+				return response()->json($dt);
+			}
+		}
+	}
+
 }
 
 ?>

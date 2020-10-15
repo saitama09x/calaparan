@@ -54,4 +54,15 @@ class Student_enrolls extends Model{
 		return $query->where('teacher_id', '=', $teacher_id);
 	}
 
+	function scopeGetlevel($query, $level){
+		return $query->where('gradeyr', $level)->latest('yr_from');
+	}
+
+	function scopeFindstudenttotal($query, $teacher_id, $yr){
+		return $query->where([
+			['teacher_id', '=', $teacher_id],
+			['yr_from', '=', $yr],
+		]);
+	}
+
 }

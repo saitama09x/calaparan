@@ -27,38 +27,6 @@ class StudentController extends Controller{
 		$this->partial = $partial;
 	}
 
-	function list_students($year = null){
-
-		if($year != null){
-
-			$id = Auth::user()->account_id;
-
-			$enrolls = Student_enrolls::where([
-				[ 'teacher_id', '=', $id],
-				[ 'yr_from', '=', $year]
-			])->get();
-
-			$obj = [
-				'enrolls' => $enrolls,
-				'year_from' => $year,
-				'year_to' => $year + 1
-			];
-
-			return view('students.teacher-list_student', $obj);
-
-		}
-
-		$id = Auth::user()->account_id;
-		$history = Student_enrolls::select("yr_from")->where('teacher_id', $id)->orderBy("yr_from", "DESC")->groupBy('yr_from')->get();
-
-		$obj = [
-			'history' => $history
-		];
-
-		return view('students.teacher-list_year', $obj);
-		
-	}
-
 
 	function index(){
 
@@ -171,8 +139,8 @@ class StudentController extends Controller{
 
 		$records = Student_records::where("enroll_id", $enroll_id)->get();
 
+		$grades_arr = [];
 		if($records->count()){
-			$grades_arr = [];
 			foreach($records as $r){
 				if($r->subject->parent_id == 0){
 					$grades_arr[$r->subject->subjcode] = [
@@ -180,11 +148,11 @@ class StudentController extends Controller{
 						'subject' => $r->subject->subjname,
 						'subcode' => $r->subject->subjcode,
 						'enroll_id' => $r->enroll_id,
-						'first' => $r->qtr_first,
-						'second' => $r->qtr_second,
-						'third' => $r->qtr_third,
-						'fourth' => $r->qtr_fourth,
-						'final' => $r->final_rate,
+						'first' => ($r->qtr_first != 0) ? $r->qtr_first : "",
+						'second' => ($r->qtr_second != 0) ? $r->qtr_second : "",
+						'third' => ($r->qtr_third != 0) ? $r->qtr_third : "",
+						'fourth' => ($r->qtr_fourth != 0) ? $r->qtr_fourth : "",
+						'final' => ($r->final_rate != 0) ? $r->final_rate : "",
 						'remarks' => $r->remarks
 					];
 				}
@@ -197,11 +165,11 @@ class StudentController extends Controller{
 							'subject' => $r->subject->subjname,
 							'subcode' => $r->subject->subjcode,
 							'enroll_id' => $r->enroll_id,
-							'first' => $r->qtr_first,
-							'second' => $r->qtr_second,
-							'third' => $r->qtr_third,
-							'fourth' => $r->qtr_fourth,
-							'final' => $r->final_rate,
+							'first' => ($r->qtr_first != 0) ? $r->qtr_first : "",
+							'second' => ($r->qtr_second != 0) ? $r->qtr_second : "",
+							'third' => ($r->qtr_third != 0) ? $r->qtr_third : "",
+							'fourth' => ($r->qtr_fourth != 0) ? $r->qtr_fourth : "",
+							'final' => ($r->final_rate != 0) ? $r->final_rate : "",
 							'remarks' => $r->remarks
 						];
 					}
@@ -450,6 +418,7 @@ class StudentController extends Controller{
 		$remedial = Student_remedials::where("enroll_id", $enroll_id)->get();
 		$recordVals = Student_values_recs::where('enroll_id', $enroll_id)->get();
 		$corevalues = Student_values::all();
+		$records = Student_records::where("enroll_id", $enroll_id)->get();
 
 		$recordVal_arr = [];
 		if($recordVals->count()){
@@ -480,7 +449,44 @@ class StudentController extends Controller{
 			}
 		}
 		
-		
+		$grades_arr = [];
+		if($records->count()){
+			foreach($records as $r){
+				if($r->subject->parent_id == 0){
+					$grades_arr[$r->subject->subjcode] = [
+						'children' => [],
+						'subject' => $r->subject->subjname,
+						'subcode' => $r->subject->subjcode,
+						'enroll_id' => $r->enroll_id,
+						'first' => ($r->qtr_first != 0) ? $r->qtr_first : "",
+						'second' => ($r->qtr_second != 0) ? $r->qtr_second : "",
+						'third' => ($r->qtr_third != 0) ? $r->qtr_third : "",
+						'fourth' => ($r->qtr_fourth != 0) ? $r->qtr_fourth : "",
+						'final' => ($r->final_rate != 0) ? $r->final_rate : "",
+						'remarks' => $r->remarks
+					];
+				}
+				else{
+					
+					$parent = Subjects::where('id', $r->subject->parent_id)->get();
+
+					if($parent->count()){
+						$grades_arr[$parent->first()->subjcode]['children'][] = [
+							'subject' => $r->subject->subjname,
+							'subcode' => $r->subject->subjcode,
+							'enroll_id' => $r->enroll_id,
+							'first' => ($r->qtr_first != 0) ? $r->qtr_first : "",
+							'second' => ($r->qtr_second != 0) ? $r->qtr_second : "",
+							'third' => ($r->qtr_third != 0) ? $r->qtr_third : "",
+							'fourth' => ($r->qtr_fourth != 0) ? $r->qtr_fourth : "",
+							'final' => ($r->final_rate != 0) ? $r->final_rate : "",
+							'remarks' => $r->remarks
+						];
+					}
+				}
+			}
+
+		}
 
 		$obj = [
 			'student' => $enroll->student,
@@ -488,7 +494,8 @@ class StudentController extends Controller{
 			'recordVals' => $recordVals,
 			'recordVal_arr' => $recordVal_arr,
 			'core_arr' => $core_arr,
-			'remedial' => $remedial
+			'remedial' => $remedial,
+			'grades' => $grades_arr
 		];
 		
 		return view('students.showStudent', $obj);
@@ -501,18 +508,21 @@ class StudentController extends Controller{
 		$id = false;
 
 		$delete = Student_eligibles::where('student_id', $student_id);
-		
+
 		if($delete->exists()){
 			$delete->delete();
 		}
 
-		foreach($eligibility as $e){
-			$id = Student_eligibles::insertGetId(['student_id' => $student_id, 'eligible_id' => $e, 'school_id' => $school]);
-		}
+		if(isset($eligibility)){
 
-		if($id){
-			return redirect('/admin/enroll/student/' . $student_id);
+			foreach($eligibility as $e){
+				$id = Student_eligibles::insertGetId(['student_id' => $student_id, 'eligible_id' => $e, 'school_id' => $school]);
+			}
 		}
+		
+
+		return redirect('/admin/enroll/student/' . $student_id)->with('is_updated', true);
+
 	}
 
 	function add_other_eligibities(Request $r){
@@ -548,8 +558,21 @@ class StudentController extends Controller{
 			$new->save();
 		}
 		
-		return redirect()->route('admin-student-enroll', ['id' => $student_id]);
+		return redirect()->route('admin-student-enroll', ['id' => $student_id])->with('is_updated', true);
 
+	}
+
+	function grade_enroll_history($student_id, $level){
+
+		$student = Students::find($student_id);	
+		$enrolls = $student->enrolls()->getlevel($level)->get();
+
+		$obj = [
+			'student' => $student,
+			'enrolls' => $enrolls
+		];
+
+		return view('students.enroll_history', $obj);
 	}
 
 	function grade_enroll($student_id){
@@ -560,12 +583,24 @@ class StudentController extends Controller{
 		$credentials = Credentials::all();
 		$others_eligible = Other_eligibles::where('student_id', $student_id)->get();
 		$school = Schools::all();
-
+		$allenrolls = $student->enrolls()->get();
+		$status_enroll = $student->enrolls()->orderBy("yr_from", "asc")->get();
 		$adviser = [];
 
 		foreach($gradeyr as $yr){
 			$all_grades = Grade_sections::where('gradelevel', $yr->gradelevel)->get();
-			$adviser[$yr->gradelevel] = ['enroll_id' => '', 'yr_from' => '', 'yr_to' => '', 'data' => []];
+			$adviser[$yr->gradelevel] = ['enroll_id' => '', 'yr_from' => '', 'yr_to' => '', 'data' => [], "type" => "", "route" => "ENROLLED"];
+			
+			$current_level = $student->enrolls()->getlevel($yr->gradelevel)->get();
+
+			if($current_level->count()){
+				$adviser[$yr->gradelevel]['yr_from'] = $current_level->first()->yr_from;
+				$adviser[$yr->gradelevel]['yr_to'] = $current_level->first()->yr_to;
+				$adviser[$yr->gradelevel]['enroll_id'] = $current_level->first()->id;
+				$adviser[$yr->gradelevel]['type'] = $current_level->first()->enroll_type;
+				$adviser[$yr->gradelevel]['route'] = $current_level->first()->enroll_type;
+			}
+
 			if($all_grades->count()){
 				foreach($all_grades as $grade){
 					$lists = Teachers::where('section_id', $grade->id)->get();
@@ -581,15 +616,20 @@ class StudentController extends Controller{
 						$total_student = 0;
 						$enroll_id = null;
 						$enroll = $student->enrolls()->findteacher($l->id);
-						if($enroll->exists()){
-							$is_select = true;
-							$total_student = $enroll->count();
+
+						if($allenrolls->count()){
+							
+							$enroll_total = Student_enrolls::findstudenttotal($l->id, $allenrolls->first()->yr_from);
+							
+							if($enroll_total->exists()){
+								$total_student = $enroll_total->count();	
+							}
 						}
 
-						if($is_select){
-							$adviser[$yr->gradelevel]['yr_from'] = $enroll->first()->yr_from;
-							$adviser[$yr->gradelevel]['yr_to'] = $enroll->first()->yr_to;
-							$adviser[$yr->gradelevel]['enroll_id'] = $enroll->first()->id;
+						if($enroll->exists()){
+							if($enroll->first()->teacher_id == $current_level->first()->teacher_id){
+								$is_select = true;
+							}
 						}
 						
 						$adviser[$yr->gradelevel]['data'][] = (object)[
@@ -610,6 +650,7 @@ class StudentController extends Controller{
 			'adviser' => $adviser,
 			'credential' => $credentials,
 			'school' => $school,
+			'status_enroll' => $status_enroll,
 			'others_eligible' => $others_eligible
 		];
 
@@ -617,7 +658,48 @@ class StudentController extends Controller{
 		
 	}
 
-	function grade_enroll_add(Request $r){
+	function update_enroll_status(Request $r){
+
+		$yr_from = $r->yr_from;
+		$student_id = $r->student_id;
+		$teacher_id = $r->teacher_id;
+		$status = $r->status;
+		$remarks = $r->remarks;
+
+		$validatedData = $r->validate([
+	        'yr_from' => 'required',
+	        'student_id' => 'required',
+	        'teacher_id' => 'required',
+	        'status' => 'required',
+	        'remarks' => 'required'
+	    ]);
+
+		$find = Student_enrolls::where([
+			['yr_from', '=', $yr_from],
+			['student_id', '=', $student_id],
+			['teacher_id', '=', $teacher_id],
+		]);
+
+		if($find->exists()){
+			$find->update([
+				'enroll_type' => $status,
+				'remarks' => $remarks
+			]);
+
+			return redirect()->route('admin-student-enroll', ['id' => $student_id])->with('is_updated_status', true);
+
+		}
+		else{
+
+			return redirect()->route('admin-student-enroll', ['id' => $student_id])->with('is_updated_status', false);
+
+		}
+
+
+	}
+
+
+	function grade_enroll_add(Request $r, $type){
 		
 		$validatedData = $r->validate([
 	        'gradeyr' => 'required|integer',
@@ -641,7 +723,15 @@ class StudentController extends Controller{
 
 		$find_enroll = Student_enrolls::where('student_id', '=', $id)->where('gradeyr', '=', $gradeyr);
 
-		$eligible = Student_eligibles::where('student_id', $id)->get();
+		if($type == "REENROLLED"){
+			$find_enroll = Student_enrolls::where([
+				['student_id', '=', $id],
+				['gradeyr', '=', $gradeyr],
+				['yr_from', '=', $yr_from],
+				['yr_to', '=', $yr_to],
+				['enroll_type', '=', $type]
+			]);
+		}
 
 		$teacher = Teachers::find($teacher_id);
 
@@ -652,7 +742,8 @@ class StudentController extends Controller{
 			$new->gradeyr = $gradeyr;
 			$new->yr_from = $yr_from;
 			$new->yr_to = $yr_to;
-			$new->school_id = $eligible->first()->school_id;
+			$new->enroll_type = $type;
+			$new->school_id = 1;
 			$new->datecreated = date("Y-m-d", time());
 			if($new->save()){
 				
@@ -752,7 +843,7 @@ class StudentController extends Controller{
 
 	function print_grade_records($enroll_id){
 
-		$enrolls = Student_records::where('enroll_id', $enroll_id)->get();
+		$records = Student_records::where('enroll_id', $enroll_id)->get();
 		$recordVals = Student_values_recs::where('enroll_id', $enroll_id)->get();
 		$remedials = Student_remedials::where("enroll_id", $enroll_id)->get();
 
@@ -788,8 +879,48 @@ class StudentController extends Controller{
 			}
 		}
 
+
+		$grades_arr = [];
+		if($records->count()){
+			foreach($records as $r){
+				if($r->subject->parent_id == 0){
+					$grades_arr[$r->subject->subjcode] = [
+						'children' => [],
+						'subject' => $r->subject->subjname,
+						'subcode' => $r->subject->subjcode,
+						'enroll_id' => $r->enroll_id,
+						'first' => ($r->qtr_first != 0) ? $r->qtr_first : "",
+						'second' => ($r->qtr_second != 0) ? $r->qtr_second : "",
+						'third' => ($r->qtr_third != 0) ? $r->qtr_third : "",
+						'fourth' => ($r->qtr_fourth != 0) ? $r->qtr_fourth : "",
+						'final' => ($r->final_rate != 0) ? $r->final_rate : "",
+						'remarks' => $r->remarks
+					];
+				}
+				else{
+					
+					$parent = Subjects::where('id', $r->subject->parent_id)->get();
+
+					if($parent->count()){
+						$grades_arr[$parent->first()->subjcode]['children'][] = [
+							'subject' => $r->subject->subjname,
+							'subcode' => $r->subject->subjcode,
+							'enroll_id' => $r->enroll_id,
+							'first' => ($r->qtr_first != 0) ? $r->qtr_first : "",
+							'second' => ($r->qtr_second != 0) ? $r->qtr_second : "",
+							'third' => ($r->qtr_third != 0) ? $r->qtr_third : "",
+							'fourth' => ($r->qtr_fourth != 0) ? $r->qtr_fourth : "",
+							'final' => ($r->final_rate != 0) ? $r->final_rate : "",
+							'remarks' => $r->remarks
+						];
+					}
+				}
+			}
+
+		}
+
 		$obj = [
-			'enrolls' => $enrolls,
+			'grades' => $grades_arr,
 			'recordVals' => $recordVals,
 			'remedials' => $remedials,
 			'core_arr' => $core_arr

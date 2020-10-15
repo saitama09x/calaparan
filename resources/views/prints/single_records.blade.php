@@ -127,17 +127,43 @@
 		<tr><th>1</th><th>2</th><th>3</th><th>4</th></tr>
 	</thead>
 <tbody>
-@foreach($enrolls as $e)
+@if(count($grades))
+@foreach($grades as $g)
+
+@if(!count($g['children']))
+
 <tr>
-	<td>{{$e->subject->subjname}}</td>
-	<td class='text-center'>{{$e->qtr_first}}</td>
-	<td class='text-center'>{{$e->qtr_second}}</td>
-	<td class='text-center'>{{$e->qtr_third}}</td>
-	<td class='text-center'>{{$e->qtr_fourth}}</td>
-	<td class='text-center'>{{$e->final_rate}}</td>
-	<td class='text-center'>{!!$e->remarks!!}</td>
+<td>{{$g['subject']}}</td>
+<td>{{$g['first']}}</td>
+<td>{{$g['second']}}</td>
+<td>{{$g['third']}}</td>
+<td>{{$g['fourth']}}</td>
+<td>{{$g['final']}}</td>
+<td>{!! $g['remarks'] !!}
+</td>
+</tr>
+
+@else
+
+<tr>
+<td colspan="7"><strong>{{$g['subject']}}</strong></td>
+</tr>
+
+@foreach($g['children'] as $c)
+
+<tr class='child-item'>
+<td>{{$c['subject']}}</td>
+<td>{{$c['first']}}</td>
+<td>{{$c['second']}}</td>
+<td>{{$c['third']}}</td>
+<td>{{$c['fourth']}}</td>
+<td>{{$c['final']}}</td>
+<td>{!! $c['remarks'] !!}</td>
 </tr>
 @endforeach
+@endif
+@endforeach
+@endif
 </tbody>
 </table>
 

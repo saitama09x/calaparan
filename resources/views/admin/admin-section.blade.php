@@ -28,7 +28,7 @@
 							<td>{{isset($s->adviser) ? $s->adviser->fullname : '' }}</td>
 							<td>{{$year_label[$s->gradelevel]}}</td>
 							<td>{{isset($s->adviser) ? $s->adviser->enrolls->count() : '' }}</td>
-							<td><a href="{{route('section_edit', $s->id)}}" class='btn btn-warning btn-md'>Edit</a></td>
+							<td><a href="{{route('section_edit', $s->id)}}" class='btn btn-primary btn-md mr-2'>Edit</a><a href="{{route('section_students', $s->id)}}" class='btn btn-warning btn-md'>View Students</a></td>
 						</tr>
 					@endforeach
 				@endif

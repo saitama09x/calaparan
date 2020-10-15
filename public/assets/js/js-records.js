@@ -7,6 +7,13 @@ $(document).ready(function(){
 		})
 
 		var load_records = function(){
+			var dom = $("#dom-load");
+			var div = $("<div>");
+			div.addClass("d-flex justify-content-center");
+			var img = $("<img>");
+			img.attr('src', api.base_url + "/assets/img/loader1.gif");
+			div.html(img);
+			dom.html(div);
 			var enroll_id = $("meta[name='enroll-id']").data('id')
 			api.student_load(enroll_id, function(res){
 				$("#dom-load").html(res)
@@ -15,6 +22,13 @@ $(document).ready(function(){
 
 		var load_remedial = function(){
 			var enroll_id = $("meta[name='enroll-id']").data('id')
+			var dom = $("#remedial-load");
+			var div = $("<div>");
+			div.addClass("d-flex justify-content-center");
+			var img = $("<img>");
+			img.attr('src', api.base_url + "/assets/img/loader1.gif");
+			div.html(img);
+			dom.html(div);
 			api.remedial_load(enroll_id, function(res){
 				$("#remedial-load").html(res)
 			});
@@ -53,19 +67,29 @@ $(document).ready(function(){
 		$("[name^='quarter']").click(function(){
 
 			var val = $(this).val();
-			
+			var enroll_id = $("meta[name='enroll-id']").data('id')
+			var gradeval = $("[name^='gradeval']");
+
+			api.get_qtr_record({ enroll_id : enroll_id, qtr : val}, function(res){
+					if(res){
+						gradeval.each(function(index, item){
+							var id = $(this).data("id");
+							$(this).val(res.records[id]);
+						})
+					}
+			});
+
+
 		})
 
 		$("#studentrecord").on('submit', function(e){
 			e.preventDefault();
 			var gradeval = $("[name^='gradeval']");
 			var quarter = $("[name^='quarter']");
-			var sid = $("meta[name='student-id']").data('id')
-			var gradeyr = $("meta[name='student-yr']").data('yr')
+			var enroll_id = $("meta[name='enroll-id']").data('id')
 
 			var form = new FormData();
-			form.append('sid', sid)
-			form.append('grade_yr', gradeyr);
+			form.append('enroll_id', enroll_id)
 
 			quarter.each(function(index, val){
 				if($(this).is(":checked")){
@@ -215,7 +239,7 @@ $(document).ready(function(){
 			}
 
 			api.insert_core_values(data, function(res){
-				console.log(res)
+				alert("successfully saved")
 			})
 
 		})

@@ -203,7 +203,7 @@ $rowspan = count($core_arr[$k]['val']);
 </div>
 </div>
 
-@include('partials.students.edit_records', ['enrolls' => $enrolls])
+@include('partials.students.edit_records', ['grades' => $grades])
 
 @include('partials.students.edit_remedial', ['remedial' => $remedial, 'enrolls' => $enrolls])
 
@@ -212,8 +212,8 @@ $rowspan = count($core_arr[$k]['val']);
 @push('scripts')
 <script src="{{ asset('assets/summernote/summernote-lite.js') }}"></script>
 <script src="{{ asset('assets/datepicker/js/bootstrap-datepicker.min.js') }}"></script>
-<script src="{{ asset('assets/js/custom_api.js') }}"></script>
-<script src="{{ asset('assets/js/js-records.js') }}"></script>
+<script src="{{ asset('assets/js/custom_api.js?v=0.2') }}"></script>
+<script src="{{ asset('assets/js/js-records.js?v=0.2') }}"></script>
 @endpush
 
 

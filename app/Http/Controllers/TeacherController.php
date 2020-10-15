@@ -23,6 +23,38 @@ class TeacherController extends Controller{
 
 	}
 
+	function list_students($year = null){
+
+		if($year != null){
+
+			$id = Auth::user()->account_id;
+
+			$enrolls = Student_enrolls::where([
+				[ 'teacher_id', '=', $id],
+				[ 'yr_from', '=', $year]
+			])->get();
+
+			$obj = [
+				'enrolls' => $enrolls,
+				'year_from' => $year,
+				'year_to' => $year + 1
+			];
+
+			return view('students.teacher-list_student', $obj);
+
+		}
+
+		$id = Auth::user()->account_id;
+		$history = Student_enrolls::select("yr_from")->where('teacher_id', $id)->orderBy("yr_from", "DESC")->groupBy('yr_from')->get();
+
+		$obj = [
+			'history' => $history
+		];
+
+		return view('students.teacher-list_year', $obj);
+		
+	}
+	
 	function create(){
 
 		$teachers = Teachers::all();
