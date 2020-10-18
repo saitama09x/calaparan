@@ -67,9 +67,15 @@
 		.mb{
 			margin-bottom:20px;
 		}
+		
 		.text-center{
 			text-align:center;
 		}
+		
+		.text-left{
+			text-align:left !important;	
+		}
+
 		#footer{
 			padding: 20px;
 		    background-color: gray;
@@ -217,18 +223,78 @@
 		<tr><th>1</th><th>2</th><th>3</th><th>4</th></tr>
 	</thead>
 	<tbody>
-		@if($e->records->count())
-		@foreach($e->records as $r)
-			<tr>
-				<td>{{$r->subject->subjname}}</td>
-				<td>{{( $r->qtr_first != 0) ? $r->qtr_first : ""}}</td>
-				<td>{{( $r->qtr_second != 0) ? $r->qtr_second : ""}}</td>
-				<td>{{( $r->qtr_third != 0) ? $r->qtr_third : ""}}</td>
-				<td>{{( $r->qtr_fourth != 0) ? $r->qtr_fourth : ""}}</td>
-				<td>{{( $r->final_rate != 0) ? $r->final_rate : ""}}</td>
-				<td>{!! $r->remarks !!}</td>
-			</tr>
-		@endforeach
+	@php
+		if($e->records->count()){
+			$grades_arr = [];
+			foreach($e->records as $r){
+				if($r->subject->parent_id == 0){
+					$grades_arr[$r->subject->subjcode] = [
+						'children' => [],
+						'subject' => $r->subject->subjname,
+						'subcode' => $r->subject->subjcode,
+						'enroll_id' => $r->enroll_id,
+						'first' => ($r->qtr_first != 0) ? $r->qtr_first : "",
+						'second' => ($r->qtr_second != 0) ? $r->qtr_second : "",
+						'third' => ($r->qtr_third != 0) ? $r->qtr_third : "",
+						'fourth' => ($r->qtr_fourth != 0) ? $r->qtr_fourth : "",
+						'final' => ($r->final_rate != 0) ? $r->final_rate : "",
+						'remarks' => $r->remarks
+					];
+				
+				}
+				else{
+
+					$parent = App\Models\Subjects::where('id', $r->subject->parent_id)->get();
+
+					if($parent->count()){
+						$grades_arr[$parent->first()->subjcode]['children'][] = [
+							'subject' => $r->subject->subjname,
+							'subcode' => $r->subject->subjcode,
+							'enroll_id' => $r->enroll_id,
+							'first' => ($r->qtr_first != 0) ? $r->qtr_first : "",
+							'second' => ($r->qtr_second != 0) ? $r->qtr_second : "",
+							'third' => ($r->qtr_third != 0) ? $r->qtr_third : "",
+							'fourth' => ($r->qtr_fourth != 0) ? $r->qtr_fourth : "",
+							'final' => ($r->final_rate != 0) ? $r->final_rate : "",
+							'remarks' => $r->remarks
+						];
+					}
+				}
+			}	
+		}
+	@endphp
+
+		@if(count($grades_arr))
+			@foreach($grades_arr as $g)
+				@if(!count($g['children']))
+					<tr>
+					<td>{{$g['subject']}}</td>
+					<td>{{$g['first']}}</td>
+					<td>{{$g['second']}}</td>
+					<td>{{$g['third']}}</td>
+					<td>{{$g['fourth']}}</td>
+					<td>{{$g['final']}}</td>
+					<td>{!! $g['remarks'] !!}
+					</td>
+					</tr>
+				@else
+					<tr>
+					<td><strong>{{$g['subject']}}</strong></td>
+					<td colspan="6"></td>
+					</tr>
+					@foreach($g['children'] as $c)
+						<tr class='child-item'>
+						<td>{{$c['subject']}}</td>
+						<td>{{$c['first']}}</td>
+						<td>{{$c['second']}}</td>
+						<td>{{$c['third']}}</td>
+						<td>{{$c['fourth']}}</td>
+						<td>{{$c['final']}}</td>
+						<td>{!! $c['remarks'] !!}</td>
+						</tr>
+					@endforeach
+				@endif
+			@endforeach
 		@endif
 	</tbody>
 </table>
@@ -272,6 +338,84 @@ if(isset($remedials[$e->id])){
 </div>
 @endforeach
 
+@if(($levels->count() - $enrolls->count()) > 0)
+
+@foreach(range(0, ($levels->count() - $enrolls->count())) as $r)
+
+<div class='col-5 px'>
+<table>
+	<tbody class="details  py-7"><tr>
+		<th>School</th>
+		<td></td>
+		<th>School ID</th>
+		<td></td>
+	</tr></tbody>
+</table>
+<table>
+	<tbody class="details  py-7"><tr>
+		<th>District</th>
+		<td></td>
+		<th>Region</th>
+		<td></td>
+	</tr></tbody>
+</table>
+<table>
+	<tbody class="details  py-7"><tr>
+		<th>Classified as Grade</th>
+		<td></td>
+		<th>Section</th>
+		<td></td>
+	</tr>
+	<tr>
+		<th class="py-7">School Year</th>
+		<td></td>
+	</tr>
+</tbody>
+</table>
+<table class="records-table mb">
+	<thead class='records-label'>
+		<tr><th rowspan="2">Learning Areas</th><th colspan="4">Quarterly Rating</th><th rowspan="2">Final Rate</th><th rowspan="2">Remarks</th></tr>
+		<tr><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+	</thead>
+	<tbody>
+		@if(count($subject_arr))
+			@foreach($subject_arr as $s)
+				@if(!count($s['children']))
+					<tr>
+						<td>{{$s['subject']}}</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+				@else
+					<tr>
+						<td><strong>{{$s['subject']}}</strong></td>
+						<td colspan="6"></td>
+					</tr>
+					@foreach($s['children'] as $c)
+						<tr>
+						<td>{{$c['subject']}}</td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					@endforeach
+				@endif
+			@endforeach
+		@endif
+	</tbody>
+</table>
+</div>
+
+@endforeach
+
+@endif
 </div>
 
 <div id="footer">

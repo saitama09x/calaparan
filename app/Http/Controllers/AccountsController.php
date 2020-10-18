@@ -76,6 +76,7 @@ class AccountsController extends Controller{
 		$r->session()->forget('profile_pic');
 
 		Auth::logout();
+		
 		return redirect()->intended('/');
 	}
 

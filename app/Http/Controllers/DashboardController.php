@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
-use App\Models\{Students, Student_enrolls, Student_records, Student_remarks};
+use App\Models\{Students, Student_enrolls, Student_records, Student_remarks, Grade_sections};
 use App\Services\School_class;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,6 +27,24 @@ class DashboardController extends Controller{
 		return view('dashboard.dashboard', $obj);
 	}
 
+	function admin_dashboard(){
+
+		$all = Grade_sections::all();
+		$enrolls = Student_enrolls::select("student_id")->whereRaw("enroll_type = 'ENROLLED' or enroll_type = 'REENROLLED'")->groupBy('student_id')->get();
+		
+		$transfer = Student_enrolls::select("student_id")->whereRaw("enroll_type = 'TRANSFERREDOUT'")->groupBy('student_id')->get();
+
+		$dropout = Student_enrolls::select("student_id")->whereRaw("enroll_type = 'DROPPEDOUT'")->groupBy('student_id')->get();
+
+		$obj = [
+			'sections' => $all,
+			'enrolls' => $enrolls,
+			'transfer' => $transfer,
+			'dropout' => $dropout
+		];
+
+		return view('admin.admin-dashboard', $obj);
+	}
 
 	function dashboard_student_records(){
 

@@ -807,7 +807,9 @@ class StudentController extends Controller{
 		$credentials = Credentials::all();
 		$school = Schools::all();
 		$enrolls = Student_enrolls::studentId($student_id)->get();
-		
+		$levels = Grade_sections::select("gradelevel")->groupBy('gradelevel')->get();
+		$subjects = Subjects::all();
+
 		$remedial_arr = [];
 		if($enrolls->count()){
 			foreach($enrolls as $e){
@@ -828,12 +830,31 @@ class StudentController extends Controller{
 			}
 		}
 
+		$subject_arr = [];
+		if($subjects->count()){
+			foreach($subjects as $s){
+				if($s->parent_id == 0){
+					$subject_arr[$s->subjcode] = [
+						'children' => [],
+						'subject' => $s->subjname,
+					];
+				}else{
+					$parent = Subjects::where('id', $s->parent_id)->get();
+					$subject_arr[$parent->first()->subjcode]['children'][] = [
+						'subject' => $s->subjname,
+					];
+				}
+			}
+		}
+
 		$obj = [
 			'student' => $student,
 			'credential' => $credentials,
 			'school' => $school,
 			'enrolls' => $enrolls,
-			'remedials' => $remedial_arr
+			'remedials' => $remedial_arr,
+			'levels' => $levels,
+			'subject_arr' => $subject_arr
 		];
 
 		

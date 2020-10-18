@@ -30,6 +30,7 @@ Route::prefix('account')->group(function() {
 Route::prefix('ajax-json')->group(function() {
 
 	Route::post('data-students', 'DataTableController@studentList');
+	Route::post('section-students', 'DataTableController@sectionStudenList');
 	Route::post('data-insert-record', 'RecordsController@api_insert_records');
 	Route::post('data-insert-remarks', 'RecordsController@api_insert_remarks');
 	Route::get('data-show-student', 'StudentController@api_show');
@@ -60,7 +61,7 @@ Route::middleware('auth:web')->group(function(){
 
 	Route::prefix('teacher')->group(function() {
 		
-		Route::get('list-students/{year?}', 'StudentController@list_students')->name('lists_student');
+		Route::get('list-students/{year?}', 'TeacherController@list_students')->name('lists_student');
 		
 		Route::get('student/record/{id}', 'StudentController@grade_record')->where('id', '[0-9]+')->name('teacher-student-record');
 
@@ -85,15 +86,13 @@ Route::middleware('auth:web')->group(function(){
 Route::get('/admin', 'AdminController@login');
 Route::post('/admin', 'AdminController@do_login');
 Route::get('/admin/register', 'AdminController@register')->name('admin_register');
-Route::post('/admin/register', 'AdminController@do_register')->name('admin_doregister');;
+Route::post('/admin/register', 'AdminController@do_register')->name('admin_doregister');
 
 Route::middleware('auth:admin')->group(function(){
 
 	Route::prefix('admin')->group(function() {
-		
-		Route::get('dashboard', function(){
-			return 'This is admin';
-		})->name('admin_dashboard');
+
+		Route::get('dashboard', 'DashboardController@admin_dashboard')->name('admin_dashboard');
 
 		Route::get('students/{id}', 'StudentController@show')->where('id', '[0-9]+')->name('single_student');
 
@@ -123,22 +122,33 @@ Route::middleware('auth:admin')->group(function(){
 		Route::get('sections', 'AdminController@sections')->name('section_all');
 		Route::get('section/create', 'AdminController@section_create')->name('section_create');
 		Route::post('section/create', 'AdminController@section_docreate')->name('section_docreate');
-		Route::get('section/edit/{id}', 'AdminController@section_edit')->where('id', '[0-9]+')->name('section_edit');
-		Route::post('section/edit/update', 'AdminController@section_doedit')->name('section_doedit');
-		Route::get('subjects', 'AdminController@subjects')->name('subject_all');
-		Route::get('subject/create', 'AdminController@subject_create')->name('subject_create');
-		Route::post('subject/create', 'AdminController@subject_docreate')->name('subject_docreate');
 		
+		Route::get('section/edit/{id}', 'AdminController@section_edit')->where('id', '[0-9]+')->name('section_edit');
+		
+		Route::post('section/edit/update', 'AdminController@section_doedit')->name('section_doedit');
+		
+		Route::get('section/students/{section}', 'AdminController@list_students')->where('section', '[0-9]+')->name('section_students');
+
+		Route::get('subjects', 'AdminController@subjects')->name('subject_all');
+		
+		Route::get('subject/create', 'AdminController@subject_create')->name('subject_create');
+
+		Route::post('subject/create', 'AdminController@subject_docreate')->name('subject_docreate');
+
 		Route::get('enroll/list-students', 'StudentController@index')->name('enroll_students');
 		
 		Route::get('enroll/student/{id}/', 'StudentController@grade_enroll')->where('id', '[0-9]+')->name('admin-student-enroll');
 
+		Route::get('enroll/student/{id}/level/{level}', 'StudentController@grade_enroll_history')->where('id', '[0-9]+')->name('admin-student-enroll_history');
+
 		Route::get('enroll/print/{id}/', 'StudentController@print_form_137')->where('id', '[0-9]+')->name('admin-print-enroll');
 		
-		Route::post('grade-enroll/add', 'StudentController@grade_enroll_add')->name('admin-grade_enroll_add');
+		Route::put('grade-enroll/add/{type}', 'StudentController@grade_enroll_add')->name('admin-grade_enroll_add');
 
 		Route::post('grade-enroll/add-eligibility', 'StudentController@add_eligibities')->name('admin-add_eligibities');
 
+		Route::post('grade-enroll/update-status', 'StudentController@update_enroll_status')->name('admin-grade_enroll_status');
+		
 		Route::post('grade-enroll/add-other-eligibility', 'StudentController@add_other_eligibities')->name('admin-add_other_eligibities');
 
 		Route::get('student/record/{id}', 'StudentController@grade_record')->where('id', '[0-9]+')->name('admin-student-record');
@@ -151,7 +161,7 @@ Route::middleware('auth:admin')->group(function(){
 
 		Route::put('account/create/{type}/{id}', 'AdminController@docreate_account')->name("admin-docreate-account");
 
-		Route::get('logout', 'AccountsController@account_logout')->name('logout');
+		Route::get('logout', 'AdminController@account_logout')->name('logout');
 	});
 
 });

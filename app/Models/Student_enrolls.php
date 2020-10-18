@@ -50,6 +50,13 @@ class Student_enrolls extends Model{
 		return $query->where("student_id", $id)->oldest();
 	}
 
+	function scopeStudentLevel($query, $id, $level){
+		return $query->where([
+			["student_id", "=", $id],
+			["gradeyr", "=", $level]
+		])->oldest();
+	}
+
 	function scopeFindteacher($query, $teacher_id){
 		return $query->where('teacher_id', '=', $teacher_id);
 	}

@@ -72,6 +72,14 @@
 			        @endif
 	          @endif
 	          @if(Auth::guard('admin')->check())
+	          <li class="nav-item has-treeview">
+		            <a href="{{route('admin_dashboard')}}" class="nav-link">
+		              <i class="nav-icon fas fa-tachometer-alt"></i>
+		              <p>
+		                Dashboard
+		              </p>
+		            </a>
+		        </li>
 		          <li class="nav-item has-treeview">
 		            <a href="{{route('teacher_all')}}" class="nav-link">
 		              <i class="nav-icon fas fa-tachometer-alt"></i>

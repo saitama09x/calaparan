@@ -23,10 +23,17 @@ class AdminController extends Controller{
 		$pass = $r->password;
 		
 		if(Auth::guard('admin')->attempt(['username' => $user, 'password' => $pass])){
-			return redirect('/admin/teachers');
+			return redirect()->route("admin_dashboard");
 		}
 
-		return redirect('/admin')->with("login_error", "Incorrect Login");
+		return redirect("/admin")->with("login_error", "Incorrect Login");
+	}
+
+	function account_logout(Request $r){
+
+		Auth::logout();
+		
+		return redirect()->intended('/admin');
 	}
 
 	function register(){

@@ -16,9 +16,19 @@ class DataTableController extends Controller{
 		$lists = Students::all();
 		$start = $r->start;
 		$length = $r->length;
+		$search = $r->search['value'];
+
+		if(!empty($search)){
+			$lists = Students::whereRaw("lname like \"%{$search}%\" or fname like \"%{$search}%\"")->get();
+		}
 
 		$dt = ['draw' => 0, 'recordsTotal' => 0, 'recordsFiltered' => 0, 'data' => []];
 		$data = [];
+
+		if(!$lists->count()){
+			return response()->json($dt);
+		}
+
 		foreach($lists as $list){
 			$enrolls = $list->many_enroll()->get();
 			$enroll = Student_enrolls::studentId($list->id);
@@ -66,7 +76,7 @@ class DataTableController extends Controller{
 		}
 
 		$dt['recordsTotal'] = count($data);
-		$splice = array_splice($data, 0, 10);
+		$splice = array_splice($data, $start, $length);
 		$dt['recordsFiltered'] = count($splice);
 		$dt['data'] = $splice;
 
